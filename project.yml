@@ -11,10 +11,10 @@ targets:
       - path: Weiqi
         excludes:
           - external
-      - path: ../weiqi/third_party/katago/cpp/core
-      - path: ../weiqi/third_party/katago/cpp/game
-      - path: ../weiqi/third_party/katago/cpp/dataio
-      - path: ../weiqi/third_party/katago/cpp/neuralnet
+      - path: Weiqi/external/katago/cpp/core
+      - path: Weiqi/external/katago/cpp/game
+      - path: Weiqi/external/katago/cpp/dataio
+      - path: Weiqi/external/katago/cpp/neuralnet
         excludes:
           - cudabackend.cpp
           - cudautils.cpp
@@ -28,10 +28,10 @@ targets:
           - opencltuner.cpp
           - dummybackend.cpp
           - "*.opencl"
-      - path: ../weiqi/third_party/katago/cpp/book
-      - path: ../weiqi/third_party/katago/cpp/search
-      - path: ../weiqi/third_party/katago/cpp/program
-      - path: ../weiqi/third_party/katago/cpp/version.cpp
+      - path: Weiqi/external/katago/cpp/book
+      - path: Weiqi/external/katago/cpp/search
+      - path: Weiqi/external/katago/cpp/program
+      - path: Weiqi/external/katago/cpp/version.cpp
     settings:
       GENERATE_INFOPLIST_FILE: YES
       CURRENT_PROJECT_VERSION: "1"
@@ -40,11 +40,13 @@ targets:
       OTHER_LDFLAGS: "-lz"
       OTHER_CPLUSPLUSFLAGS: >
         -std=c++20 -DUSE_EIGEN_BACKEND -DNO_GIT_REVISION -DNO_LIBZIP
-        -I../weiqi/third_party/katago/cpp
-        -I../weiqi/third_party/katago/cpp/external
-        -I../weiqi/third_party/katago/cpp/external/tclap-1.2.5/include
-        -I../weiqi/third_party/katago/cpp/external/filesystem-1.5.8/include
-        -I../weiqi/third_party/katago/cpp/external/half-2.2.0/include
+        -Wno-documentation -Wno-documentation-deprecated-sync -Wno-deprecated-anon-enum-enum-conversion
+        -Wno-unused-variable -Wno-shorten-64-to-32
+        -IWeiqi/external/katago/cpp
+        -IWeiqi/external/katago/cpp/external
+        -IWeiqi/external/katago/cpp/external/tclap-1.2.5/include
+        -IWeiqi/external/katago/cpp/external/filesystem-1.5.8/include
+        -IWeiqi/external/katago/cpp/external/half-2.2.0/include
         -IWeiqi/external/eigen3
     frameworks:
       - CoreGraphics
