@@ -46,7 +46,6 @@ struct GameView: View {
                 // Player Profiles
                 HStack {
                     // Player 1 (Black)
-                    // Player 1 (Black)
                     HStack(spacing: 12) {
                         Circle().fill(Color.black).frame(width: 40, height: 40).shadow(color: .black.opacity(0.5), radius: 2)
                             .overlay(Circle().stroke(currentTurn == .black ? accentColor : Color.clear, lineWidth: 2))
@@ -63,9 +62,9 @@ struct GameView: View {
                             .opacity(isThinking ? 0 : 1)
                         
                         if isThinking {
-                            ProgressView()
-                                .progressViewStyle(CircularProgressViewStyle(tint: accentColor))
-                                .scaleEffect(1.0)
+                            Text("...")
+                                .font(.system(size: 20, weight: .black))
+                                .foregroundColor(accentColor)
                         }
                     }
                     .frame(width: 40)
@@ -98,17 +97,28 @@ struct GameView: View {
                         }
                     }
                     .padding(.vertical, 8).padding(.horizontal, 16).background(Color.white.opacity(0.08)).cornerRadius(12).padding(.bottom, 8)
-                    .transition(.move(edge: .top).combined(with: .opacity))
                 }
 
                 Spacer().frame(height: 12)
                 
-                BoardView(
-                    boardState: boardState, previewMove: previewMove, lastMove: lastMove,
-                    analysis: analysis, showAnalysis: showAnalysis, isGameOver: finalScore != nil,
-                    currentTurnColor: currentTurn, onMoveTapped: handleTap
-                )
-                .padding(.horizontal, 4)
+                // Only render the board once the engine is ready
+                if isEngineInitialized {
+                    BoardView(
+                        boardState: boardState, previewMove: previewMove, lastMove: lastMove,
+                        analysis: analysis, showAnalysis: showAnalysis, isGameOver: finalScore != nil,
+                        currentTurnColor: currentTurn, onMoveTapped: handleTap
+                    )
+                    .padding(.horizontal, 4)
+                } else {
+                    VStack(spacing: 12) {
+                        Text("Initializing Engine...")
+                            .foregroundColor(.gray)
+                            .font(.system(size: 14, weight: .medium))
+                    }
+                    .frame(maxWidth: .infinity)
+                    .aspectRatio(1, contentMode: .fit)
+                    .padding(20)
+                }
 
                 Spacer(minLength: 12)
                 
@@ -143,7 +153,12 @@ struct GameView: View {
             }
         }
         .preferredColorScheme(.dark)
-        .onAppear { initializeEngine() }
+        .onAppear {
+            // Sequential loading: wait a bit before starting engine
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                initializeEngine()
+            }
+        }
         .sheet(isPresented: $showSettings) {
             SettingsView(settings: $pendingSettings, visits: $currentVisits) {
                 startNewGame(settings: pendingSettings, visits: currentVisits)
