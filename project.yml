@@ -11,6 +11,7 @@ targets:
       - path: Weiqi
         excludes:
           - external
+      - path: Weiqi/Assets.xcassets
       - path: Weiqi/external/katago/cpp/core
       - path: Weiqi/external/katago/cpp/game
       - path: Weiqi/external/katago/cpp/dataio
@@ -35,6 +36,7 @@ targets:
     settings:
       INFOPLIST_FILE: Weiqi/Info.plist
       PRODUCT_BUNDLE_IDENTIFIER: com.cwave.weiqi
+      ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
       CURRENT_PROJECT_VERSION: "1"
       MARKETING_VERSION: "1.0"
       SWIFT_OBJC_BRIDGING_HEADER: Weiqi/Weiqi-Bridging-Header.h

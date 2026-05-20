@@ -22,6 +22,7 @@
 		2A583734CE0CAB76F311FC24 /* evalcache.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 42154A6519B7088DF22D946F /* evalcache.cpp */; };
 		2C6BB13A8DEABEFBDE9B51B2 /* setup.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FFE99FFE6F7053840DCADE39 /* setup.cpp */; };
 		2DAC082DA639EB117508043D /* hash.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 40B90FA126E6BFAF0AD65E70 /* hash.cpp */; };
+		32A6741FFB18C7F674D774CB /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 22A0B0F1D4634F6F49EB9331 /* Assets.xcassets */; };
 		350311D0122CFDEA3B2400E3 /* distributiontable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4034036477229DCD3B5A9154 /* distributiontable.cpp */; };
 		376BC1D3C66C0EE68E38C739 /* searchhelpers.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 541B2F4D8A94DC8BECE08B8B /* searchhelpers.cpp */; };
 		3B2E096524A6325B6C436307 /* elo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 67D814362D4D0DB67890AE59 /* elo.cpp */; };
@@ -115,6 +116,7 @@
 		20836A4FFA0A091938AC5A89 /* selfplaymanager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = selfplaymanager.h; sourceTree = "<group>"; };
 		2150945D6BD44C62FC613834 /* board.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = board.cpp; sourceTree = "<group>"; };
 		21F76F87A19C76D783915ED4 /* version.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = version.cpp; sourceTree = "<group>"; };
+		22A0B0F1D4634F6F49EB9331 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		23DB72707A3ED192123636F5 /* gitinfotemplate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = gitinfotemplate.h; sourceTree = "<group>"; };
 		242FF6D0A8421A0B6A362B43 /* commandloop.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = commandloop.h; sourceTree = "<group>"; };
 		26F0F08FF7ECAAD809797DC9 /* searchparams.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = searchparams.h; sourceTree = "<group>"; };
@@ -307,6 +309,7 @@
 			isa = PBXGroup;
 			children = (
 				9D36F1ADEDFF6236C36106D6 /* AppDelegate.swift */,
+				22A0B0F1D4634F6F49EB9331 /* Assets.xcassets */,
 				D0D0A60260F3AC687988FAA7 /* Info.plist */,
 				0BAFCE6C7070963EFC5319FB /* KataGoBridge.cpp */,
 				85DBADF074E4C8F5EBCF4847 /* KataGoBridge.hpp */,
@@ -615,6 +618,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				32A6741FFB18C7F674D774CB /* Assets.xcassets in Resources */,
 				C65A1A1DDA3DE433804F5B39 /* LaunchScreen.storyboard in Resources */,
 				B9A614A025B99DCEACEBA28A /* cudahelpers.cu in Resources */,
 				3F10CE6FE97EDE3F2252142A /* gtp.cfg in Resources */,
