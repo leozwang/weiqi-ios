@@ -3,53 +3,239 @@ import SwiftUI
 struct GameView: View {
     @State private var gameMode: GameMode = .userBlack
     @State private var bridge: KataGoWrapper?
-    @State private var status: String = "Initializing Engine..."
+    @State private var status: String = "Ready"
     @State private var boardState: [[Stone]] = Array(repeating: Array(repeating: .empty, count: 19), count: 19)
     @State private var lastMove: (Int, Int)?
+    @State private var previewMove: (Int, Int)?
     @State private var currentTurn: Stone = .black
     @State private var analysis = AnalysisResult()
     @State private var isThinking = false
+    @State private var showAnalysis = false
+    @State private var isEngineInitialized = false
+    @State private var finalScore: String? = nil
+    @State private var showGameOverDialog = false
+    @State private var showSettings = false
+    
+    @State private var moveHistory: [(Int, Int, Stone)] = []
+    @State private var redoStack: [(Int, Int, Stone)] = []
+    @State private var consecutivePasses = 0
+    
+    @State private var pendingSettings = GameSettings()
+    @State private var currentVisits: Int = 1000
+
+    private let backgroundColor = Color(red: 24/255, green: 24/255, blue: 28/255)
+    private let accentColor = Color(red: 100/255, green: 200/255, blue: 255/255)
 
     var body: some View {
-        NavigationView {
-            VStack {
-                HeaderView(status: status, analysis: analysis, isThinking: isThinking)
-                    .padding(.horizontal)
-
-                BoardView(
-                    boardState: boardState,
-                    lastMove: lastMove,
-                    analysis: analysis,
-                    showAnalysis: true,
-                    onMoveTapped: handleUserMove
-                )
-                .padding(4)
-
-                Spacer()
+        ZStack {
+            backgroundColor.ignoresSafeArea()
+            
+            VStack(spacing: 0) {
+                // Top Navigation Bar
+                HStack {
+                    Button(action: {}) { Image(systemName: "line.3.horizontal").font(.system(size: 24)).foregroundColor(.white) }
+                    Spacer()
+                    Text(finalScore ?? "Weiqi").font(.system(size: 18, weight: .black)).foregroundColor(.white).tracking(1)
+                    Spacer()
+                    Button(action: { showAnalysis.toggle(); if showAnalysis { triggerAnalysis() } }) {
+                        Image(systemName: showAnalysis ? "eye.fill" : "eye.slash").font(.system(size: 22)).foregroundColor(showAnalysis ? accentColor : .white)
+                    }
+                }
+                .padding(.horizontal, 24).padding(.top, 16).padding(.bottom, 20)
                 
-                ControlBar(onReset: resetGame, onUndo: undoMove)
-            }
-            .navigationTitle("Weiqi")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Menu {
-                        Picker("Game Mode", selection: $gameMode) {
-                            Text("You are Black").tag(GameMode.userBlack)
-                            Text("You are White").tag(GameMode.userWhite)
-                            Text("Human vs Human").tag(GameMode.userBoth)
-                            Text("AI vs AI").tag(GameMode.aiBoth)
+                // Player Profiles
+                HStack {
+                    // Player 1 (Black)
+                    // Player 1 (Black)
+                    HStack(spacing: 12) {
+                        Circle().fill(Color.black).frame(width: 40, height: 40).shadow(color: .black.opacity(0.5), radius: 2)
+                            .overlay(Circle().stroke(currentTurn == .black ? accentColor : Color.clear, lineWidth: 2))
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(gameMode == .userWhite ? "KataGo" : (gameMode == .aiBoth ? "KataGo" : "You"))
+                                .font(.system(size: 18, weight: .bold)).foregroundColor(.white)
+                            Text("Captures: 0").font(.system(size: 14)).foregroundColor(.gray)
                         }
-                    } label: {
-                        Image(systemName: "gearshape")
+                    }
+                    Spacer()
+                    
+                    ZStack {
+                        Text("VS").font(.system(size: 16, weight: .black)).foregroundColor(.gray.opacity(0.5))
+                            .opacity(isThinking ? 0 : 1)
+                        
+                        if isThinking {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle(tint: accentColor))
+                                .scaleEffect(1.0)
+                        }
+                    }
+                    .frame(width: 40)
+                    
+                    Spacer()
+                    // Player 2 (White)
+                    HStack(spacing: 12) {
+                        VStack(alignment: .trailing, spacing: 2) {
+                            Text(gameMode == .userBlack ? "KataGo" : (gameMode == .aiBoth ? "KataGo" : "You"))
+                                .font(.system(size: 18, weight: .bold)).foregroundColor(.white)
+                            Text("Captures: 0").font(.system(size: 14)).foregroundColor(.gray)
+                        }
+                        Circle().fill(Color.white).frame(width: 40, height: 40).shadow(color: .black.opacity(0.3), radius: 2)
+                            .overlay(Circle().stroke(currentTurn == .white ? accentColor : Color.clear, lineWidth: 2))
+                    }
+                }
+                .padding(.horizontal, 24).padding(.bottom, 12)
+                
+                // AI Status Row
+                if showAnalysis && finalScore == nil {
+                    HStack(spacing: 20) {
+                        HStack(spacing: 8) {
+                            Text("Black Winrate").font(.system(size: 12, weight: .bold)).foregroundColor(.gray)
+                            Text("\(Int(analysis.winrate * 100))%").font(.system(size: 16, weight: .heavy)).foregroundColor(accentColor)
+                        }
+                        Rectangle().fill(Color.gray.opacity(0.3)).frame(width: 1, height: 20)
+                        HStack(spacing: 8) {
+                            Text("Score Lead").font(.system(size: 12, weight: .bold)).foregroundColor(.gray)
+                            Text("\(analysis.scoreLead >= 0 ? "B" : "W")+\(String(format: "%.1f", abs(analysis.scoreLead)))").font(.system(size: 16, weight: .heavy)).foregroundColor(accentColor)
+                        }
+                    }
+                    .padding(.vertical, 8).padding(.horizontal, 16).background(Color.white.opacity(0.08)).cornerRadius(12).padding(.bottom, 8)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+                }
+
+                Spacer().frame(height: 12)
+                
+                BoardView(
+                    boardState: boardState, previewMove: previewMove, lastMove: lastMove,
+                    analysis: analysis, showAnalysis: showAnalysis, isGameOver: finalScore != nil,
+                    currentTurnColor: currentTurn, onMoveTapped: handleTap
+                )
+                .padding(.horizontal, 4)
+
+                Spacer(minLength: 12)
+                
+                // Navigation Row: Undo - PASS (Skip) - Redo
+                HStack(spacing: 0) {
+                    ActionButton(icon: "arrow.uturn.backward", title: "Undo", action: undoMove).disabled(moveHistory.isEmpty || isThinking)
+                    Spacer()
+                    ActionButton(icon: "slash.circle", title: "Pass", action: handlePass).disabled(gameMode == .aiBoth || isThinking || finalScore != nil)
+                    Spacer()
+                    ActionButton(icon: "arrow.uturn.forward", title: "Redo", action: redoMove).disabled(redoStack.isEmpty || isThinking)
+                }
+                .padding(.horizontal, 40)
+                
+                Spacer(minLength: 12)
+                
+                // Primary Action Bar (PLACE & NEW GAME)
+                HStack(spacing: 16) {
+                    Button(action: { showSettings = true }) {
+                        HStack { Image(systemName: "plus.circle.fill"); Text("NEW GAME") }.font(.system(size: 14, weight: .bold)).foregroundColor(.white).frame(width: 130, height: 64)
+                            .background(RoundedRectangle(cornerRadius: 32).fill(Color.orange)).shadow(color: Color.orange.opacity(0.3), radius: 6, y: 3)
+                    }
+                    .disabled(isThinking)
+
+                    Button(action: { if let move = previewMove { executeMove(x: move.0, y: move.1) } }) {
+                        Text("PLACE").font(.system(size: 20, weight: .black)).tracking(2).foregroundColor(.white).frame(maxWidth: .infinity).frame(height: 64)
+                            .background(RoundedRectangle(cornerRadius: 32).fill(previewMove != nil ? Color(red: 30/255, green: 130/255, blue: 240/255) : Color.gray.opacity(0.3)))
+                            .shadow(color: previewMove != nil ? Color(red: 30/255, green: 130/255, blue: 240/255).opacity(0.4) : .clear, radius: 8, y: 4)
+                    }
+                    .disabled(previewMove == nil || isThinking || finalScore != nil)
+                }
+                .padding(.horizontal, 20).padding(.bottom, 30)
+            }
+        }
+        .preferredColorScheme(.dark)
+        .onAppear { initializeEngine() }
+        .sheet(isPresented: $showSettings) {
+            SettingsView(settings: $pendingSettings, visits: $currentVisits) {
+                startNewGame(settings: pendingSettings, visits: currentVisits)
+            }
+        }
+        .alert("Game Over", isPresented: $showGameOverDialog) {
+            Button("NEW GAME") { showSettings = true }
+            Button("BACK TO BOARD", role: .cancel) { }
+        } message: { Text("Result: \(finalScore ?? "Unknown")") }
+    }
+
+    private func handleTap(x: Int, y: Int) {
+        guard isEngineInitialized, !isThinking, finalScore == nil else { return }
+        let isUserTurn = gameMode == .userBoth || (gameMode == .userBlack && currentTurn == .black) || (gameMode == .userWhite && currentTurn == .white)
+        guard isUserTurn, boardState[y][x] == .empty else { return }
+        previewMove = (x, y)
+    }
+
+    private func executeMove(x: Int, y: Int) {
+        guard let engine = bridge else { return }
+        if engine.sendGtpCommand("play \(currentTurn == .black ? "black" : "white") \(toGtpCoord(x: x, y: y))")?.hasPrefix("=") == true {
+            moveHistory.append((x, y, currentTurn)); redoStack.removeAll(); boardState[y][x] = currentTurn
+            lastMove = (x, y); previewMove = nil; currentTurn = (currentTurn == .black ? .white : .black); consecutivePasses = 0
+            if showAnalysis { triggerAnalysis() }
+            checkAiTurn()
+        }
+    }
+
+    private func handlePass() {
+        guard let engine = bridge, !isThinking, finalScore == nil else { return }
+        if engine.sendGtpCommand("play \(currentTurn == .black ? "black" : "white") pass")?.hasPrefix("=") == true {
+            previewMove = nil; currentTurn = (currentTurn == .black ? .white : .black); consecutivePasses += 1
+            if consecutivePasses >= 2 { finishGame() } else { if showAnalysis { triggerAnalysis() }; checkAiTurn() }
+        }
+    }
+
+    private func checkAiTurn() {
+        guard isEngineInitialized, !isThinking, finalScore == nil else { return }
+        if (gameMode == .aiBoth) || (gameMode == .userBlack && currentTurn == .white) || (gameMode == .userWhite && currentTurn == .black) { triggerAiMove() }
+    }
+
+    private func triggerAiMove() {
+        guard let engine = bridge else { return }
+        isThinking = true
+        DispatchQueue.global(qos: .userInitiated).async {
+            let res = engine.sendGtpCommand("genmove \(currentTurn == .black ? "black" : "white")")
+            DispatchQueue.main.async {
+                isThinking = false
+                if let response = res, response.hasPrefix("=") {
+                    let moveStr = response.replacingOccurrences(of: "= ", with: "").trimmingCharacters(in: .whitespacesAndNewlines)
+                    if moveStr.uppercased() == "PASS" {
+                        currentTurn = (currentTurn == .black ? .white : .black); consecutivePasses += 1
+                        if consecutivePasses >= 2 { finishGame() }
+                    } else if let pos = fromGtpCoord(moveStr) {
+                        moveHistory.append((pos.0, pos.1, currentTurn)); redoStack.removeAll(); boardState[pos.1][pos.0] = currentTurn
+                        lastMove = pos; currentTurn = (currentTurn == .black ? .white : .black); consecutivePasses = 0
+                    }
+                    if showAnalysis { triggerAnalysis() }
+                    if gameMode == .aiBoth && finalScore == nil { DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { checkAiTurn() } }
+                }
+            }
+        }
+    }
+    
+    private func triggerAnalysis() {
+        guard let engine = bridge, isEngineInitialized, !isThinking else { return }
+        isThinking = true
+        DispatchQueue.global(qos: .userInitiated).async {
+            let analysisVisits = max(100, Int(Double(currentVisits) * 0.4))
+            engine.sendGtpCommand("think black \(analysisVisits)")
+            let res = engine.sendGtpCommand("kata-get-analysis black")
+            DispatchQueue.main.async {
+                isThinking = false
+                if let response = res, response.hasPrefix("=") {
+                    let jsonStr = response.replacingOccurrences(of: "=", with: "").trimmingCharacters(in: .whitespacesAndNewlines)
+                    if let data = jsonStr.data(using: .utf8), let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any], let rootInfo = json["rootInfo"] as? [String: Any] {
+                        analysis.winrate = rootInfo["winrate"] as? Double ?? 0.5
+                        analysis.scoreLead = rootInfo["scoreLead"] as? Double ?? 0.0
                     }
                 }
             }
-            .onChange(of: gameMode) { newMode in
-                checkAiTurn()
-            }
-            .onAppear {
-                initializeEngine()
+        }
+    }
+
+    private func finishGame() {
+        isThinking = true
+        DispatchQueue.global(qos: .userInitiated).async {
+            let res = bridge?.sendGtpCommand("final_score")
+            DispatchQueue.main.async {
+                isThinking = false
+                finalScore = res?.replacingOccurrences(of: "= ", with: "") ?? "Game Ended"
+                showGameOverDialog = true
             }
         }
     }
@@ -58,183 +244,141 @@ struct GameView: View {
         let engine = KataGoWrapper()
         let configPath = Bundle.main.path(forResource: "gtp", ofType: "cfg") ?? ""
         let modelPath = Bundle.main.path(forResource: "model", ofType: "bin.gz") ?? ""
-
         DispatchQueue.global(qos: .userInitiated).async {
-            let result = engine.initEngine(withConfig: configPath, model: modelPath)
-            DispatchQueue.main.async {
-                if result == 0 {
-                    self.bridge = engine
-                    status = "Ready"
-                    syncBoard()
-                    checkAiTurn()
-                } else {
-                    status = "Failed to initialize: \(result)"
-                }
+            if engine.initEngine(withConfig: configPath, model: modelPath) == 0 {
+                DispatchQueue.main.async { self.bridge = engine; self.isEngineInitialized = true; checkAiTurn() }
             }
         }
     }
 
-    private func handleUserMove(x: Int, y: Int) {
-        guard let engine = bridge, !isThinking else { return }
-        
-        // Only allow moves if it's the user's turn in the current mode
-        let isUserTurn = gameMode == .userBoth ||
-                         (gameMode == .userBlack && currentTurn == .black) ||
-                         (gameMode == .userWhite && currentTurn == .white)
-        
-        guard isUserTurn else { return }
-        if boardState[y][x] != .empty { return }
-
-        let colorStr = currentTurn == .black ? "black" : "white"
-        let moveStr = toGtpCoord(x: x, y: y)
-        
-        let res = engine.sendGtpCommand("play \(colorStr) \(moveStr)")
-        if res?.hasPrefix("=") == true {
-            boardState[y][x] = currentTurn
-            lastMove = (x, y)
-            currentTurn = (currentTurn == .black ? .white : .black)
-            status = "\(currentTurn == .black ? "Black" : "White")'s turn"
-            
-            checkAiTurn()
-        }
-    }
-
-    private func checkAiTurn() {
-        guard let _ = bridge, !isThinking else { return }
-        
-        let shouldAiPlay = (gameMode == .aiBoth) ||
-                           (gameMode == .userBlack && currentTurn == .white) ||
-                           (gameMode == .userWhite && currentTurn == .black)
-        
-        if shouldAiPlay {
-            triggerAiMove()
-        }
-    }
-
-    private func triggerAiMove() {
-        guard let engine = bridge, !isThinking else { return }
-        
-        isThinking = true
-        status = "AI is thinking..."
-        
-        let colorStr = currentTurn == .black ? "black" : "white"
-        
+    private func startNewGame(settings: GameSettings, visits: Int) {
+        guard let engine = bridge else { return }
+        isThinking = true; showSettings = false
         DispatchQueue.global(qos: .userInitiated).async {
-            let res = engine.sendGtpCommand("genmove \(colorStr)")
-            
+            engine.sendGtpCommand("clear_board"); engine.sendGtpCommand("set_max_visits \(visits)")
+            engine.sendGtpCommand("komi \(settings.handicap > 0 ? 0.5 : 7.5)")
+            if settings.handicap > 0 { engine.sendGtpCommand("fixed_handicap \(settings.handicap)") }
+            let rawBoard = getFixedHandicapStones(count: settings.handicap)
             DispatchQueue.main.async {
-                isThinking = false
-                if let response = res, response.hasPrefix("=") {
-                    let moveStr = response.replacingOccurrences(of: "= ", with: "").trimmingCharacters(in: .whitespacesAndNewlines)
-                    
-                    if moveStr.uppercased() == "PASS" {
-                        status = "AI passed"
-                        currentTurn = (currentTurn == .black ? .white : .black)
-                    } else if let pos = fromGtpCoord(moveStr) {
-                        boardState[pos.1][pos.0] = currentTurn
-                        lastMove = pos
-                        currentTurn = (currentTurn == .black ? .white : .black)
-                        status = "\(currentTurn == .black ? "Black" : "White")'s turn"
-                    }
-                    
-                    // If AI vs AI, trigger next move
-                    if gameMode == .aiBoth {
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                            checkAiTurn()
-                        }
-                    }
-                } else {
-                    status = "AI error: \(res ?? "unknown")"
-                }
+                boardState = Array(repeating: Array(repeating: .empty, count: 19), count: 19)
+                for pos in rawBoard { boardState[pos.1][pos.0] = .black }
+                lastMove = nil; previewMove = nil; finalScore = nil; analysis = AnalysisResult(); consecutivePasses = 0
+                moveHistory = rawBoard.map { ($0.0, $0.1, .black) }; redoStack.removeAll()
+                gameMode = settings.mode; currentTurn = settings.handicap > 0 ? .white : .black
+                isThinking = false; checkAiTurn()
             }
         }
     }
-
-    private func fromGtpCoord(_ coord: String) -> (Int, Int)? {
-        let coord = coord.uppercased()
-        guard coord.count >= 2 else { return nil }
-        
-        let letters = "ABCDEFGHJKLMNOPQRST"
-        let colChar = coord.first!
-        guard let col = letters.firstIndex(of: colChar) else { return nil }
-        
-        let rowStr = coord.dropFirst()
-        guard let rowNum = Int(rowStr) else { return nil }
-        let row = 19 - rowNum
-        
-        let colIndex = letters.distance(from: letters.startIndex, to: col)
-        return (colIndex, row)
+    
+    private func getFixedHandicapStones(count: Int) -> [(Int, Int)] {
+        let pts = [(3,3), (15,15), (15,3), (3,15), (9,9), (3,9), (15,9), (9,3), (9,15)]
+        if count <= 0 { return [] }; if count == 1 { return [(15,3)] }
+        if count == 2 { return [(15,3), (3,15)] }; if count == 3 { return [(15,3), (3,15), (15,15)] }
+        if count == 4 { return [(15,3), (3,15), (15,15), (3,3)] }; if count == 5 { return [(15,3), (3,15), (15,15), (3,3), (9,9)] }
+        if count == 6 { return [(15,3), (3,15), (15,15), (3,3), (15,9), (3,9)] }; if count == 7 { return [(15,3), (3,15), (15,15), (3,3), (15,9), (3,9), (9,9)] }
+        if count == 8 { return [(15,3), (3,15), (15,15), (3,3), (15,9), (3,9), (9,3), (9,15)] }
+        return Array(pts.prefix(9))
     }
 
-    private func syncBoard() {
-        // Full board sync if we had a getBoardState bridge
+    private func undoMove() {
+        guard !isThinking, let last = moveHistory.popLast() else { return }
+        bridge?.sendGtpCommand("undo"); redoStack.append(last); boardState[last.1][last.0] = .empty
+        lastMove = moveHistory.last.map { ($0.0, $0.1) }; currentTurn = last.2; consecutivePasses = 0
+        if showAnalysis { triggerAnalysis() }
+    }
+    
+    private func redoMove() {
+        guard !isThinking, let next = redoStack.popLast() else { return }
+        if bridge?.sendGtpCommand("play \(next.2 == .black ? "black" : "white") \(toGtpCoord(x: next.0, y: next.1))")?.hasPrefix("=") == true {
+            moveHistory.append(next); boardState[next.1][next.0] = next.2; lastMove = (next.0, next.1); currentTurn = (next.2 == .black ? .white : .black); consecutivePasses = 0
+            if showAnalysis { triggerAnalysis() }
+        }
     }
 
     private func toGtpCoord(x: Int, y: Int) -> String {
         let letters = "ABCDEFGHJKLMNOPQRST"
-        let col = Array(letters)[x]
-        let row = 19 - y
-        return "\(col)\(row)"
+        return "\(Array(letters)[x])\(19 - y)"
     }
 
-    private func resetGame() {
-        bridge?.sendGtpCommand("clear_board")
-        boardState = Array(repeating: Array(repeating: .empty, count: 19), count: 19)
-        lastMove = nil
-        currentTurn = .black
-        status = "Ready"
-        checkAiTurn()
+    private func fromGtpCoord(_ coord: String) -> (Int, Int)? {
+        let coord = coord.uppercased(); guard coord.count >= 2 else { return nil }
+        let letters = "ABCDEFGHJKLMNOPQRST"
+        guard let col = letters.firstIndex(of: coord.first!) else { return nil }
+        guard let rowNum = Int(coord.dropFirst()) else { return nil }
+        return (letters.distance(from: letters.startIndex, to: col), 19 - rowNum)
     }
+}
+
+// --- Subviews ---
+
+struct SettingsView: View {
+    @Binding var settings: GameSettings
+    @Binding var visits: Int
+    var onStart: () -> Void
+    @Environment(\.presentationMode) var presentationMode
     
-    private func undoMove() {
-        // GTP 'undo'
-        let _ = bridge?.sendGtpCommand("undo")
-        // Note: Full board sync would be better here
+    private let levels: [(String, Int)] = [("Easy", 100), ("Amateur", 500), ("Advanced", 1000), ("Pro", 2500)]
+    
+    var body: some View {
+        NavigationView {
+            Form {
+                Section(header: Text("Play As")) {
+                    Picker("Mode", selection: $settings.mode) {
+                        ForEach(GameMode.allCases, id: \.self) { (mode: GameMode) in
+                            Text(mode.rawValue).tag(mode)
+                        }
+                    }.pickerStyle(.inline)
+                }
+                
+                Section(header: Text("Handicap")) {
+                    Stepper("\(settings.handicap) Stones", value: $settings.handicap, in: 0...9)
+                }
+                
+                Section(header: Text("AI Strength")) {
+                    Picker("Strength", selection: $visits) {
+                        ForEach(levels, id: \.1) { (level: (String, Int)) in
+                            Text(level.0).tag(level.1)
+                        }
+                    }.pickerStyle(.segmented)
+                    
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("\(visits) visits per move")
+                            .font(.caption)
+                            .foregroundColor(.gray)
+                        
+                        Button(action: onStart) {
+                            Text("START GAME")
+                                .font(.system(size: 16, weight: .black))
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 50)
+                                .background(Color.blue)
+                                .cornerRadius(25)
+                        }
+                    }
+                    .listRowBackground(Color.clear)
+                    .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0))
+                }
+            }
+            .navigationTitle("New Game")
+            .navigationBarItems(trailing: Button("Cancel") { presentationMode.wrappedValue.dismiss() })
+        }
     }
 }
 
-struct HeaderView: View {
-    let status: String
-    let analysis: AnalysisResult
-    let isThinking: Bool
-
+struct ActionButton: View {
+    let icon: String
+    let title: String
+    let action: () -> Void
+    @Environment(\.isEnabled) private var isEnabled
     var body: some View {
-        VStack(spacing: 8) {
-            Text(status)
-                .font(.headline)
-            
-            HStack {
-                Text("Winrate: \(Int(analysis.winrate * 100))%")
-                Spacer()
-                Text("Score: \(String(format: "%.1f", analysis.scoreLead))")
+        Button(action: action) {
+            VStack(spacing: 8) {
+                Image(systemName: icon).font(.system(size: 24))
+                Text(title).font(.system(size: 14, weight: .bold))
             }
-            .font(.subheadline)
-            .foregroundColor(.secondary)
-            
-            if isThinking {
-                ProgressView()
-                    .progressViewStyle(LinearProgressViewStyle())
-            }
+            .foregroundColor(isEnabled ? .white : .white.opacity(0.3))
+            .frame(width: 72, height: 72).background(Color.white.opacity(0.05)).cornerRadius(20)
         }
-        .padding()
-        .background(Color(.secondarySystemBackground))
-        .cornerRadius(12)
-    }
-}
-
-struct ControlBar: View {
-    var onReset: () -> Void
-    var onUndo: () -> Void
-
-    var body: some View {
-        HStack(spacing: 40) {
-            Button(action: onUndo) {
-                Label("Undo", systemImage: "arrow.uturn.backward")
-            }
-            Button(action: onReset) {
-                Label("Reset", systemImage: "arrow.counterclockwise")
-            }
-        }
-        .padding()
     }
 }

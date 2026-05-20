@@ -57,7 +57,10 @@
 		9C9695DDD314462822285ABC /* rand_helpers.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A42803AA567B0587CCC77C12 /* rand_helpers.cpp */; };
 		9E59831D230BB361E391A562 /* GameModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05B8987056B670F463ACF213 /* GameModels.swift */; };
 		A5205E3F75F55C5B8F675932 /* searchpuct.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 543CB2DFE77006E62C89358F /* searchpuct.cpp */; };
+		A87DA788A3CFE1444D33F8BA /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D36F1ADEDFF6236C36106D6 /* AppDelegate.swift */; };
+		A945F6D9DB1CD334E3F0CB0A /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA3F4A309D4B7E34B1FAD3C8 /* SceneDelegate.swift */; };
 		AB54A1D0F9E7EA6D492A9540 /* searchnodetable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1CC5602C1FE3C18C6E2971A /* searchnodetable.cpp */; };
+		AB7D42A8B6AA4329F97F4F6D /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F02FB587E9C971FB65C4DB /* ViewController.swift */; };
 		AED4ECF63008AB27ECD69235 /* searchresults.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D8E58872FB3E43DC0874E1BC /* searchresults.cpp */; };
 		B174B3364367A0B573E7964B /* board.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2150945D6BD44C62FC613834 /* board.cpp */; };
 		B216034259AC1342B5192BE4 /* searchnnhelpers.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94E62B530991B4CAB348F79B /* searchnnhelpers.cpp */; };
@@ -70,6 +73,7 @@
 		C3AC1D700691A84FC1532D26 /* multithread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4DAF501C5BCD0E25D20BB154 /* multithread.cpp */; };
 		C3C094127DD76B2815F720F6 /* poswriter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ECDA18C250E65807487730A6 /* poswriter.cpp */; };
 		C3C6BA70CB250066700BC04A /* playsettings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D54D87513495541597218BF2 /* playsettings.cpp */; };
+		C65A1A1DDA3DE433804F5B39 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9846CBECDE45DDFF280532E8 /* LaunchScreen.storyboard */; };
 		C6AFFC4A69E71E62E5654E7E /* searchmultithreadhelpers.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A3A0E861F7657AE682ACF9DB /* searchmultithreadhelpers.cpp */; };
 		C72880B4B3880D50244B2D23 /* searchparams.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AB9F51CE1DB1D56979B594ED /* searchparams.cpp */; };
 		C99701A0126EBE169FF46241 /* bsearch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FF2378D8A1C4655B9653F479 /* bsearch.cpp */; };
@@ -80,7 +84,6 @@
 		DDF1559066E0CAF7418448DE /* sgf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A650C7B71A75E741635C4A5B /* sgf.cpp */; };
 		DF8EB1528B7ABE8E23B2B38C /* asyncbot.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49D37189B02567322518B1DA /* asyncbot.cpp */; };
 		DFADEA653B41FE78E98CE77D /* trainingwrite.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C3AC67E364AC223035D2C43 /* trainingwrite.cpp */; };
-		DFFC7674CD3AAFBA1EEC5707 /* WeiqiApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2AC26AD5ABA4DBE2FA538B1 /* WeiqiApp.swift */; };
 		E0BB6B6A3E07F26AE283A610 /* KataGoBridge.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0BAFCE6C7070963EFC5319FB /* KataGoBridge.cpp */; };
 		E76BC0F7846D360D6DF1B9E1 /* bookcssjs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C2BE8D87FA4103CC627E282 /* bookcssjs.cpp */; };
 		E7A3804C3A0E056CD367468C /* searchprint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D1D1D506A6D82F4BF4E75A0B /* searchprint.cpp */; };
@@ -183,7 +186,9 @@
 		950436051EB395DF63C2ED78 /* subtreevaluebiastable.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = subtreevaluebiastable.cpp; sourceTree = "<group>"; };
 		9631DAC6C51DDCC17C116528 /* cudautils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = cudautils.h; sourceTree = "<group>"; };
 		965121850C51E4838B9B168A /* rand.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = rand.h; sourceTree = "<group>"; };
+		9846CBECDE45DDFF280532E8 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		988618071B8BB1037081AD6B /* numpywrite.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = numpywrite.h; sourceTree = "<group>"; };
+		9D36F1ADEDFF6236C36106D6 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		9DB601E68C34D5976D489F26 /* using.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = using.h; sourceTree = "<group>"; };
 		9F38F60CB004CEB3046A598A /* opencltuner.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = opencltuner.h; sourceTree = "<group>"; };
 		9FD64A7907F0AB9E8CBDA818 /* threadsafequeue.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = threadsafequeue.cpp; sourceTree = "<group>"; };
@@ -191,7 +196,6 @@
 		A19C333E2FCCAB7429D664ED /* makedir.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = makedir.h; sourceTree = "<group>"; };
 		A1D0774339B32C16A987141A /* global.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = global.h; sourceTree = "<group>"; };
 		A209D0E81C8221679F5B08DF /* simpleallocator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = simpleallocator.h; sourceTree = "<group>"; };
-		A2AC26AD5ABA4DBE2FA538B1 /* WeiqiApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeiqiApp.swift; sourceTree = "<group>"; };
 		A2FC6C6DFA9F55856E65C47B /* homedata.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = homedata.cpp; sourceTree = "<group>"; };
 		A2FCB5E2BDF3B1AF0DF201C3 /* sgf.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = sgf.h; sourceTree = "<group>"; };
 		A31BC7AEA4145D31800E35A3 /* searchtimehelpers.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = searchtimehelpers.cpp; sourceTree = "<group>"; };
@@ -201,6 +205,7 @@
 		A433135C837652ACC56413F4 /* playsettings.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = playsettings.h; sourceTree = "<group>"; };
 		A650C7B71A75E741635C4A5B /* sgf.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = sgf.cpp; sourceTree = "<group>"; };
 		A65D12F7C53BBEF2E0F8BD07 /* multithread.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = multithread.h; sourceTree = "<group>"; };
+		AA3F4A309D4B7E34B1FAD3C8 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		AB198E7C3834507384197504 /* parallel.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = parallel.cpp; sourceTree = "<group>"; };
 		AB8EF23D860DEACE1EAC0F92 /* gtpconfig.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = gtpconfig.h; sourceTree = "<group>"; };
 		AB9F51CE1DB1D56979B594ED /* searchparams.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = searchparams.cpp; sourceTree = "<group>"; };
@@ -212,6 +217,7 @@
 		B280480DEE2FA567F4418BE3 /* timer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = timer.h; sourceTree = "<group>"; };
 		B45F4DC93B0C46E8DEB3163A /* cudahelpers.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = cudahelpers.h; sourceTree = "<group>"; };
 		B515E3D04C89AA0AD62A7907 /* threadsafecounter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = threadsafecounter.h; sourceTree = "<group>"; };
+		B5F02FB587E9C971FB65C4DB /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		BA88FDC9A780DF3EB28F2588 /* mutexpool.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = mutexpool.cpp; sourceTree = "<group>"; };
 		BB263F2C0F85558FAAA49EF2 /* sha2.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = sha2.cpp; sourceTree = "<group>"; };
 		BC0F23A9E2C2ED3049E6DD2A /* threadsafecounter.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = threadsafecounter.cpp; sourceTree = "<group>"; };
@@ -224,6 +230,7 @@
 		CA27A8B6FE38BB477C4B5992 /* commontypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = commontypes.h; sourceTree = "<group>"; };
 		CC6221945B123E2A9FF893A0 /* GameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameView.swift; sourceTree = "<group>"; };
 		CE4C6CB23D246D25DE9E0476 /* cudahelpers.cu */ = {isa = PBXFileReference; path = cudahelpers.cu; sourceTree = "<group>"; };
+		D0D0A60260F3AC687988FAA7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		D1D1D506A6D82F4BF4E75A0B /* searchprint.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = searchprint.cpp; sourceTree = "<group>"; };
 		D2F2EF614DA5C6A0CB1769D8 /* evalcache.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = evalcache.h; sourceTree = "<group>"; };
 		D2F7E265D6673B49CD40226C /* files.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = files.cpp; sourceTree = "<group>"; };
@@ -299,12 +306,16 @@
 		65325B1EBA5A566174604704 /* Weiqi */ = {
 			isa = PBXGroup;
 			children = (
+				9D36F1ADEDFF6236C36106D6 /* AppDelegate.swift */,
+				D0D0A60260F3AC687988FAA7 /* Info.plist */,
 				0BAFCE6C7070963EFC5319FB /* KataGoBridge.cpp */,
 				85DBADF074E4C8F5EBCF4847 /* KataGoBridge.hpp */,
 				544A5D5B5EE044CA3AAD8547 /* KataGoWrapper.h */,
 				7E95D52960F77568DB6E3FD8 /* KataGoWrapper.mm */,
+				9846CBECDE45DDFF280532E8 /* LaunchScreen.storyboard */,
+				AA3F4A309D4B7E34B1FAD3C8 /* SceneDelegate.swift */,
+				B5F02FB587E9C971FB65C4DB /* ViewController.swift */,
 				872FAA6468325FBB17A87ED6 /* Weiqi-Bridging-Header.h */,
-				A2AC26AD5ABA4DBE2FA538B1 /* WeiqiApp.swift */,
 				792003B9424EDAE32E661D5B /* Assets */,
 				7952E20A487E818EA97FF333 /* Models */,
 				54315030246B008262721238 /* Views */,
@@ -604,6 +615,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C65A1A1DDA3DE433804F5B39 /* LaunchScreen.storyboard in Resources */,
 				B9A614A025B99DCEACEBA28A /* cudahelpers.cu in Resources */,
 				3F10CE6FE97EDE3F2252142A /* gtp.cfg in Resources */,
 				6DEAF2D4B9691BD84C59227E /* model.bin.gz in Resources */,
@@ -617,12 +629,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A87DA788A3CFE1444D33F8BA /* AppDelegate.swift in Sources */,
 				6525A579A4361566E7B79678 /* BoardView.swift in Sources */,
 				9E59831D230BB361E391A562 /* GameModels.swift in Sources */,
 				4ED1C9EAE1FD16060DC0A6D9 /* GameView.swift in Sources */,
 				E0BB6B6A3E07F26AE283A610 /* KataGoBridge.cpp in Sources */,
 				228B60C6429784CF05AF388B /* KataGoWrapper.mm in Sources */,
-				DFFC7674CD3AAFBA1EEC5707 /* WeiqiApp.swift in Sources */,
+				A945F6D9DB1CD334E3F0CB0A /* SceneDelegate.swift in Sources */,
+				AB7D42A8B6AA4329F97F4F6D /* ViewController.swift in Sources */,
 				3E6F9F941640459E3EFACCD0 /* analysisdata.cpp in Sources */,
 				DF8EB1528B7ABE8E23B2B38C /* asyncbot.cpp in Sources */,
 				EF9ACDD193783748B76BB3DA /* base64.cpp in Sources */,
@@ -765,17 +779,26 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
-				GENERATE_INFOPLIST_FILE = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/Weiqi/external/katago/cpp",
+					"$(SRCROOT)/Weiqi/external/katago/cpp/external",
+					"$(SRCROOT)/Weiqi/external/katago/cpp/external/tclap-1.2.5/include",
+					"$(SRCROOT)/Weiqi/external/katago/cpp/external/filesystem-1.5.8/include",
+					"$(SRCROOT)/Weiqi/external/katago/cpp/external/half-2.2.0/include",
+					"$(SRCROOT)/Weiqi/external/eigen3",
+				);
+				INFOPLIST_FILE = Weiqi/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				OTHER_CPLUSPLUSFLAGS = "-std=c++20 -DUSE_EIGEN_BACKEND -DNO_GIT_REVISION -DNO_LIBZIP -Wno-documentation -Wno-documentation-deprecated-sync -Wno-deprecated-anon-enum-enum-conversion -Wno-unused-variable -Wno-shorten-64-to-32 -IWeiqi/external/katago/cpp -IWeiqi/external/katago/cpp/external -IWeiqi/external/katago/cpp/external/tclap-1.2.5/include -IWeiqi/external/katago/cpp/external/filesystem-1.5.8/include -IWeiqi/external/katago/cpp/external/half-2.2.0/include -IWeiqi/external/eigen3\n";
+				OTHER_CPLUSPLUSFLAGS = "-std=c++20 -DUSE_EIGEN_BACKEND -DNO_GIT_REVISION -DNO_LIBZIP -Wno-documentation -Wno-documentation-deprecated-sync -Wno-deprecated-anon-enum-enum-conversion -Wno-unused-variable -Wno-shorten-64-to-32\n";
 				OTHER_LDFLAGS = "-lz";
-				PRODUCT_BUNDLE_IDENTIFIER = com.cwave.Weiqi;
+				PRODUCT_BUNDLE_IDENTIFIER = com.cwave.weiqi;
 				SDKROOT = iphoneos;
 				SWIFT_OBJC_BRIDGING_HEADER = "Weiqi/Weiqi-Bridging-Header.h";
+				SWIFT_USE_EXPLICIT_MODULE_BUILD = NO;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -786,17 +809,26 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
-				GENERATE_INFOPLIST_FILE = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/Weiqi/external/katago/cpp",
+					"$(SRCROOT)/Weiqi/external/katago/cpp/external",
+					"$(SRCROOT)/Weiqi/external/katago/cpp/external/tclap-1.2.5/include",
+					"$(SRCROOT)/Weiqi/external/katago/cpp/external/filesystem-1.5.8/include",
+					"$(SRCROOT)/Weiqi/external/katago/cpp/external/half-2.2.0/include",
+					"$(SRCROOT)/Weiqi/external/eigen3",
+				);
+				INFOPLIST_FILE = Weiqi/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				OTHER_CPLUSPLUSFLAGS = "-std=c++20 -DUSE_EIGEN_BACKEND -DNO_GIT_REVISION -DNO_LIBZIP -Wno-documentation -Wno-documentation-deprecated-sync -Wno-deprecated-anon-enum-enum-conversion -Wno-unused-variable -Wno-shorten-64-to-32 -IWeiqi/external/katago/cpp -IWeiqi/external/katago/cpp/external -IWeiqi/external/katago/cpp/external/tclap-1.2.5/include -IWeiqi/external/katago/cpp/external/filesystem-1.5.8/include -IWeiqi/external/katago/cpp/external/half-2.2.0/include -IWeiqi/external/eigen3\n";
+				OTHER_CPLUSPLUSFLAGS = "-std=c++20 -DUSE_EIGEN_BACKEND -DNO_GIT_REVISION -DNO_LIBZIP -Wno-documentation -Wno-documentation-deprecated-sync -Wno-deprecated-anon-enum-enum-conversion -Wno-unused-variable -Wno-shorten-64-to-32\n";
 				OTHER_LDFLAGS = "-lz";
-				PRODUCT_BUNDLE_IDENTIFIER = com.cwave.Weiqi;
+				PRODUCT_BUNDLE_IDENTIFIER = com.cwave.weiqi;
 				SDKROOT = iphoneos;
 				SWIFT_OBJC_BRIDGING_HEADER = "Weiqi/Weiqi-Bridging-Header.h";
+				SWIFT_USE_EXPLICIT_MODULE_BUILD = NO;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;

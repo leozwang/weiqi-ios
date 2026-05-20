@@ -56,19 +56,11 @@ int KataGoBridge::initEngine(const std::string& configPath, const std::string& m
 
     try {
         ConfigParser cfg(configPath, true);
-        
-        // Use the directory containing the config as a base for a 'logs' dir, 
-        // but explicitly disable all logging to prevent file creation.
         cfg.overrideKey("logAllGTPCommunication", "false");
         cfg.overrideKey("logSearchInfo", "false");
         cfg.overrideKey("logToStderr", "false");
         cfg.overrideKey("logSearchInfoInterval", "-1");
-        cfg.overrideKey("logAllSelfplay", "false");
-        cfg.overrideKey("startupPrintMessageToStderr", "false");
-        cfg.overrideKey("logSearchInfoForChosenMove", "false");
         
-        // Remove the logDir override to /dev/null which was causing errors
-        // and instead point it to a subfolder of the model path (which we know is readable/writable-ish)
         std::string internalDir = configPath.substr(0, configPath.find_last_of("/"));
         cfg.overrideKey("logDir", internalDir + "/temp_logs");
         cfg.overrideKey("homeDataDir", internalDir);
@@ -78,7 +70,6 @@ int KataGoBridge::initEngine(const std::string& configPath, const std::string& m
         seedRand = std::make_unique<Rand>();
 
         SearchParams params = Setup::loadSingleParams(cfg, Setup::SETUP_FOR_GTP);
-
         int expectedConcurrentEvals = params.numThreads;
         int defaultMaxBatchSize = std::max(8, ((expectedConcurrentEvals + 3) / 4) * 4);
 
@@ -90,7 +81,6 @@ int KataGoBridge::initEngine(const std::string& configPath, const std::string& m
         );
 
         Rules rules = Setup::loadSingleRules(cfg, false);
-
         std::string searchRandSeed = cfg.contains("searchRandSeed") ? cfg.getString("searchRandSeed") : Global::uint64ToString(seedRand->nextUInt64());
         bot = std::make_unique<AsyncBot>(params, g_nnEval, logger.get(), searchRandSeed);
         bot->setAlwaysIncludeOwnerMap(true);
@@ -101,12 +91,9 @@ int KataGoBridge::initEngine(const std::string& configPath, const std::string& m
         bot->setPosition(pla, board, hist);
 
         initialized = true;
-    } catch (const std::exception& e) {
-        initialized = false;
-        return -1;
     } catch (...) {
         initialized = false;
-        return -2;
+        return -1;
     }
 
     return 0;
@@ -125,14 +112,27 @@ std::string KataGoBridge::sendGtpCommand(const std::string& command) {
     if (mainCmd == "version") return "= " + Version::getKataGoVersion();
     if (mainCmd == "protocol_version") return "= 2";
 
+    if (mainCmd == "komi") {
+        if (parts.size() < 2) return "? missing value";
+        try { bot->setKomiIfNew(std::stof(parts[1])); } catch (...) { return "? invalid value"; }
+        return "= ";
+    }
+
+    if (mainCmd == "set_max_visits") {
+        if (parts.size() < 2) return "? missing visits";
+        try {
+            int64_t v = std::stoll(parts[1]);
+            SearchParams params = bot->getParams();
+            params.maxVisits = v; params.maxPlayouts = v;
+            bot->setParams(params);
+        } catch (...) { return "? invalid visits"; }
+        return "= ";
+    }
+
     if (mainCmd == "genmove") {
         if (parts.size() < 2) return "? missing color";
         std::string colorStr = parts[1];
-        Player pla;
-        if (colorStr == "black" || colorStr == "b" || colorStr == "B") pla = P_BLACK;
-        else if (colorStr == "white" || colorStr == "w" || colorStr == "W") pla = P_WHITE;
-        else return "? invalid color";
-
+        Player pla = (colorStr == "white" || colorStr == "w") ? P_WHITE : P_BLACK;
         TimeControls tc;
         Loc moveLoc = bot->genMoveSynchronous(pla, tc);
         std::string moveStr = Location::toString(moveLoc, bot->getRootBoard());
@@ -140,49 +140,63 @@ std::string KataGoBridge::sendGtpCommand(const std::string& command) {
         return "= " + moveStr;
     }
 
+    if (mainCmd == "think") {
+        if (parts.size() < 2) return "? missing color";
+        Player pla = (parts[1] == "white" || parts[1] == "w") ? P_WHITE : P_BLACK;
+        int64_t visits = (parts.size() >= 3) ? std::stoll(parts[2]) : 400;
+        SearchParams oldParams = bot->getParams();
+        SearchParams newParams = oldParams;
+        newParams.maxVisits = visits; newParams.maxPlayouts = visits;
+        bot->setParamsNoClearing(newParams);
+        bot->genMoveSynchronous(pla, TimeControls());
+        bot->setParamsNoClearing(oldParams);
+        return "= ";
+    }
+
     if (mainCmd == "play") {
         if (parts.size() < 3) return "? missing color or move";
-        std::string colorStr = parts[1];
-        std::string moveStr = parts[2];
-        Player pla;
-        if (colorStr == "black" || colorStr == "b" || colorStr == "B") pla = P_BLACK;
-        else if (colorStr == "white" || colorStr == "w" || colorStr == "W") pla = P_WHITE;
-        else return "? invalid color";
+        Player pla = (parts[1] == "white" || parts[1] == "w") ? P_WHITE : P_BLACK;
+        Loc moveLoc = Location::ofString(parts[2], bot->getRootBoard());
+        if (moveLoc == Board::NULL_LOC && parts[2] != "pass" && parts[2] != "PASS") return "? invalid move";
+        if (!bot->makeMove(moveLoc, pla)) return "? illegal move";
+        return "= ";
+    }
 
-        Loc moveLoc = Location::ofString(moveStr, bot->getRootBoard());
-        if (moveLoc == Board::NULL_LOC && moveStr != "pass" && moveStr != "PASS") return "? invalid move";
-
-        if (!bot->makeMove(moveLoc, pla)) {
-            return "? illegal move";
+    if (mainCmd == "undo") {
+        const BoardHistory& hist = bot->getRootHist();
+        if (hist.moveHistory.size() == 0) return "? cannot undo";
+        Board board = hist.initialBoard;
+        BoardHistory newHist(board, hist.initialPla, hist.rules, hist.initialEncorePhase);
+        for (size_t i = 0; i < hist.moveHistory.size() - 1; i++) {
+            newHist.makeBoardMoveAssumeLegal(board, hist.moveHistory[i].loc, hist.moveHistory[i].pla, nullptr);
         }
+        bot->setPosition(newHist.presumedNextMovePla, board, newHist);
         return "= ";
     }
 
     if (mainCmd == "clear_board") {
-        Rules rules = bot->getRootHist().rules;
-        int xSize = bot->getRootBoard().x_size;
-        int ySize = bot->getRootBoard().y_size;
-        Board board(xSize, ySize);
-        Player pla = P_BLACK;
-        BoardHistory hist(board, pla, rules, 0);
-        bot->setPosition(pla, board, hist);
+        Board board(bot->getRootBoard().x_size, bot->getRootBoard().y_size);
+        BoardHistory hist(board, P_BLACK, bot->getRootHist().rules, 0);
+        bot->setPosition(P_BLACK, board, hist);
         return "= ";
+    }
+
+    if (mainCmd == "final_score") {
+        bot->stopAndWait();
+        BoardHistory histCopy = bot->getRootHist();
+        float score = PlayUtils::computeLead(bot->getSearchStopAndWait(), NULL, bot->getRootBoard(), histCopy, P_WHITE, 500, OtherGameProperties());
+        std::string resp = "= ";
+        if (score == 0) resp += "0";
+        else if (score > 0) resp += "B+" + Global::strprintf("%.1f", score);
+        else resp += "W+" + Global::strprintf("%.1f", -score);
+        return resp;
     }
 
     if (mainCmd == "kata-get-analysis") {
         nlohmann::json json;
-        Player perspective = bot->getRootPla();
-        if (parts.size() >= 2) {
-            std::string pStr = parts[1];
-            if (pStr == "black" || pStr == "b") perspective = P_BLACK;
-            else if (pStr == "white" || pStr == "w") perspective = P_WHITE;
-        }
-
-        bool success = bot->getSearch()->getAnalysisJson(
-            perspective, 10, false, true, true, false, false, false, true, false, json
-        );
-
-        if (!success) return "? failed to get analysis";
+        Player perspective = P_BLACK;
+        if (parts.size() >= 2 && (parts[1] == "white" || parts[1] == "w")) perspective = P_WHITE;
+        if (!bot->getSearch()->getAnalysisJson(perspective, 10, false, true, true, false, false, false, true, false, json)) return "? failed";
         return "= " + json.dump();
     }
 
@@ -192,14 +206,9 @@ std::string KataGoBridge::sendGtpCommand(const std::string& command) {
 void KataGoBridge::shutdown() {
     std::lock_guard<std::mutex> lock(engineMutex);
     if (!initialized) return;
-
     bot->stopAndWait();
     bot.reset();
-    if(g_nnEval != nullptr) {
-        delete g_nnEval;
-        g_nnEval = nullptr;
-    }
-    logger.reset();
-    seedRand.reset();
+    if(g_nnEval != nullptr) { delete g_nnEval; g_nnEval = nullptr; }
+    logger.reset(); seedRand.reset();
     initialized = false;
 }

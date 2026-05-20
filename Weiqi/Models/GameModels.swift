@@ -6,8 +6,27 @@ enum Stone: Int {
     case white = 2
 }
 
-enum GameMode {
-    case userBlack, userWhite, userBoth, aiBoth
+enum GameMode: String, CaseIterable {
+    case userBlack = "You are Black"
+    case userWhite = "You are White"
+    case userBoth = "Two Players"
+    case aiBoth = "AI vs AI"
+    
+    var description: String {
+        switch self {
+        case .userBlack: return "Human vs AI"
+        case .userWhite: return "AI vs Human"
+        case .userBoth: return "Local Multiplayer"
+        case .aiBoth: return "Self-play"
+        }
+    }
+}
+
+struct GameSettings {
+    var mode: GameMode = .userBlack
+    var handicap: Int = 0
+    var visits: Int = 1000
+    var modelName: String = "model.bin.gz"
 }
 
 struct CandidateMove {
