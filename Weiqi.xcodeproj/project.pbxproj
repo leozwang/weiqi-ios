@@ -782,7 +782,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				HEADER_SEARCH_PATHS = (
 					"$(SRCROOT)/Weiqi/external/katago/cpp",
 					"$(SRCROOT)/Weiqi/external/katago/cpp/external",
@@ -796,7 +796,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.1;
 				OTHER_CPLUSPLUSFLAGS = "-std=c++20 -DUSE_EIGEN_BACKEND -DNO_GIT_REVISION -DNO_LIBZIP -Wno-documentation -Wno-documentation-deprecated-sync -Wno-deprecated-anon-enum-enum-conversion -Wno-unused-variable -Wno-shorten-64-to-32\n";
 				OTHER_LDFLAGS = "-lz";
 				PRODUCT_BUNDLE_IDENTIFIER = com.cwave.weiqi;
@@ -812,7 +812,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				HEADER_SEARCH_PATHS = (
 					"$(SRCROOT)/Weiqi/external/katago/cpp",
 					"$(SRCROOT)/Weiqi/external/katago/cpp/external",
@@ -826,7 +826,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.1;
 				OTHER_CPLUSPLUSFLAGS = "-std=c++20 -DUSE_EIGEN_BACKEND -DNO_GIT_REVISION -DNO_LIBZIP -Wno-documentation -Wno-documentation-deprecated-sync -Wno-deprecated-anon-enum-enum-conversion -Wno-unused-variable -Wno-shorten-64-to-32\n";
 				OTHER_LDFLAGS = "-lz";
 				PRODUCT_BUNDLE_IDENTIFIER = com.cwave.weiqi;

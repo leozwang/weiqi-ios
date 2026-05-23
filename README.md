@@ -1,10 +1,12 @@
 # Weiqi iOS
 
-A native iOS Go (Weiqi) application powered by the KataGo engine. Migrated from the original Android implementation.
+A **fully free** and **completely offline** native iOS Go (Weiqi) application powered by the KataGo engine. Unlike many other Go apps, the engine runs locally on your device, requiring no internet connection and providing unlimited play for free.
 
 ## Features
 - **Interactive Go Board**: Custom-drawn 19x19 board with stone placement and move markers.
 - **KataGo Integration**: Built-in AI using the high-performance KataGo engine via C++ interop.
+- **100% Offline**: All AI computations happen on-device. No data usage, no latency, and privacy-focused.
+- **Always Free**: No subscriptions or hidden costs. Play as many games as you want.
 - **Game Modes**:
   - **You are Black**: Play against the AI.
   - **You are White**: AI plays first.
