@@ -35,7 +35,7 @@ struct GameView: View {
                 HStack {
                     Button(action: {}) { Image(systemName: "line.3.horizontal").font(.system(size: 24)).foregroundColor(.white) }
                     Spacer()
-                    Text(finalScore ?? "Weiqi").font(.system(size: 18, weight: .black)).foregroundColor(.white).tracking(1)
+                    Text(finalScore ?? "围棋 碁 GO!").font(.system(size: 18, weight: .black)).foregroundColor(.white).tracking(1)
                     Spacer()
                     Button(action: { showAnalysis.toggle(); if showAnalysis { triggerAnalysis() } }) {
                         Image(systemName: showAnalysis ? "eye.fill" : "eye.slash").font(.system(size: 22)).foregroundColor(showAnalysis ? accentColor : .white)
@@ -50,9 +50,9 @@ struct GameView: View {
                         Circle().fill(Color.black).frame(width: 40, height: 40).shadow(color: .black.opacity(0.5), radius: 2)
                             .overlay(Circle().stroke(currentTurn == .black ? accentColor : Color.clear, lineWidth: 2))
                         VStack(alignment: .leading, spacing: 2) {
-                            Text(gameMode == .userWhite ? "KataGo" : (gameMode == .aiBoth ? "KataGo" : "You"))
+                            Text(LocalizedStringKey(gameMode == .userWhite ? "KataGo" : (gameMode == .aiBoth ? "KataGo" : "You")))
                                 .font(.system(size: 18, weight: .bold)).foregroundColor(.white)
-                            Text("Captures: 0").font(.system(size: 14)).foregroundColor(.gray)
+                            Text(LocalizedStringKey("Captures: 0")).font(.system(size: 14)).foregroundColor(.gray)
                         }
                     }
                     Spacer()
@@ -62,9 +62,7 @@ struct GameView: View {
                             .opacity(isThinking ? 0 : 1)
                         
                         if isThinking {
-                            Text("...")
-                                .font(.system(size: 20, weight: .black))
-                                .foregroundColor(accentColor)
+                            RotatingRingView(color: accentColor)
                         }
                     }
                     .frame(width: 40)
@@ -73,9 +71,9 @@ struct GameView: View {
                     // Player 2 (White)
                     HStack(spacing: 12) {
                         VStack(alignment: .trailing, spacing: 2) {
-                            Text(gameMode == .userBlack ? "KataGo" : (gameMode == .aiBoth ? "KataGo" : "You"))
+                            Text(LocalizedStringKey(gameMode == .userBlack ? "KataGo" : (gameMode == .aiBoth ? "KataGo" : "You")))
                                 .font(.system(size: 18, weight: .bold)).foregroundColor(.white)
-                            Text("Captures: 0").font(.system(size: 14)).foregroundColor(.gray)
+                            Text(LocalizedStringKey("Captures: 0")).font(.system(size: 14)).foregroundColor(.gray)
                         }
                         Circle().fill(Color.white).frame(width: 40, height: 40).shadow(color: .black.opacity(0.3), radius: 2)
                             .overlay(Circle().stroke(currentTurn == .white ? accentColor : Color.clear, lineWidth: 2))
@@ -340,7 +338,7 @@ struct SettingsView: View {
                 Section(header: Text("Play As")) {
                     Picker("Mode", selection: $settings.mode) {
                         ForEach(GameMode.allCases, id: \.self) { (mode: GameMode) in
-                            Text(mode.rawValue).tag(mode)
+                            Text(LocalizedStringKey(mode.rawValue)).tag(mode)
                         }
                     }.pickerStyle(.inline)
                 }
@@ -352,12 +350,12 @@ struct SettingsView: View {
                 Section(header: Text("AI Strength")) {
                     Picker("Strength", selection: $visits) {
                         ForEach(levels, id: \.1) { (level: (String, Int)) in
-                            Text(level.0).tag(level.1)
+                            Text(LocalizedStringKey(level.0)).tag(level.1)
                         }
                     }.pickerStyle(.segmented)
                     
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("\(visits) visits per move")
+                        Text(LocalizedStringKey("\(visits) visits per move"))
                             .font(.caption)
                             .foregroundColor(.gray)
                         
@@ -390,10 +388,34 @@ struct ActionButton: View {
         Button(action: action) {
             VStack(spacing: 8) {
                 Image(systemName: icon).font(.system(size: 24))
-                Text(title).font(.system(size: 14, weight: .bold))
+                Text(LocalizedStringKey(title)).font(.system(size: 14, weight: .bold))
             }
             .foregroundColor(isEnabled ? .white : .white.opacity(0.3))
             .frame(width: 72, height: 72).background(Color.white.opacity(0.05)).cornerRadius(20)
         }
+    }
+}
+
+struct RotatingRingView: View {
+    var color: Color = Color(red: 100/255, green: 200/255, blue: 255/255)
+    @State private var isRotating = 0.0
+    
+    var body: some View {
+        Circle()
+            .trim(from: 0, to: 0.75)
+            .stroke(
+                AngularGradient(
+                    gradient: Gradient(colors: [color, color.opacity(0.2)]),
+                    center: .center
+                ),
+                style: StrokeStyle(lineWidth: 2.5, lineCap: .round)
+            )
+            .frame(width: 20, height: 20)
+            .rotationEffect(Angle(degrees: isRotating))
+            .onAppear {
+                withAnimation(Animation.linear(duration: 1.0).repeatForever(autoreverses: false)) {
+                    isRotating = 360.0
+                }
+            }
     }
 }
