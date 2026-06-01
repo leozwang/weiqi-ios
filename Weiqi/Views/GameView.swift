@@ -12,6 +12,7 @@ struct GameView: View {
     @State private var isThinking = false
     @State private var showAnalysis = false
     @State private var isEngineInitialized = false
+    @State private var initError: String? = nil
     @State private var finalScore: String? = nil
     @State private var showGameOverDialog = false
     @State private var showSettings = false
@@ -98,7 +99,7 @@ struct GameView: View {
                 }
 
                 Spacer().frame(height: 12)
-                
+
                 // Only render the board once the engine is ready
                 if isEngineInitialized {
                     BoardView(
@@ -107,8 +108,43 @@ struct GameView: View {
                         currentTurnColor: currentTurn, onMoveTapped: handleTap
                     )
                     .padding(.horizontal, 4)
+                } else if let error = initError {
+                    VStack(spacing: 16) {
+                        Image(systemName: "exclamationmark.triangle")
+                            .font(.system(size: 44))
+                            .foregroundColor(.red)
+                        Text("Engine Failed to Initialize")
+                            .font(.headline)
+                            .foregroundColor(.white)
+                        Text(error)
+                            .font(.subheadline)
+                            .foregroundColor(.gray)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal)
+
+                        Button(action: {
+                            self.initError = nil
+                            initializeEngine()
+                        }) {
+                            Text("Retry")
+                                .font(.system(size: 16, weight: .semibold))
+                                .foregroundColor(backgroundColor)
+                                .padding(.horizontal, 24)
+                                .padding(.vertical, 12)
+                                .background(accentColor)
+                                .cornerRadius(8)
+                        }
+                        .padding(.top, 8)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .aspectRatio(1, contentMode: .fit)
+                    .padding(20)
                 } else {
                     VStack(spacing: 12) {
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle(tint: accentColor))
+                            .scaleEffect(1.2)
+                            .padding(.bottom, 4)
                         Text("Initializing Engine...")
                             .foregroundColor(.gray)
                             .font(.system(size: 14, weight: .medium))
@@ -119,7 +155,7 @@ struct GameView: View {
                 }
 
                 Spacer(minLength: 12)
-                
+
                 // Navigation Row: Undo - PASS (Skip) - Redo
                 HStack(spacing: 0) {
                     ActionButton(icon: "arrow.uturn.backward", title: "Undo", action: undoMove).disabled(moveHistory.isEmpty || isThinking)
@@ -129,9 +165,9 @@ struct GameView: View {
                     ActionButton(icon: "arrow.uturn.forward", title: "Redo", action: redoMove).disabled(redoStack.isEmpty || isThinking)
                 }
                 .padding(.horizontal, 40)
-                
+
                 Spacer(minLength: 12)
-                
+
                 // Primary Action Bar (PLACE & NEW GAME)
                 HStack(spacing: 16) {
                     Button(action: { showSettings = true }) {
@@ -220,7 +256,7 @@ struct GameView: View {
             }
         }
     }
-    
+
     private func triggerAnalysis() {
         guard let engine = bridge, isEngineInitialized, !isThinking else { return }
         isThinking = true
@@ -255,11 +291,32 @@ struct GameView: View {
 
     private func initializeEngine() {
         let engine = KataGoWrapper()
-        let configPath = Bundle.main.path(forResource: "gtp", ofType: "cfg") ?? ""
-        let modelPath = Bundle.main.path(forResource: "model", ofType: "bin.gz") ?? ""
+        guard let configPath = Bundle.main.path(forResource: "gtp", ofType: "cfg"), !configPath.isEmpty else {
+            self.initError = "Missing gtp.cfg configuration file"
+            return
+        }
+        guard let modelPath = Bundle.main.path(forResource: "model", ofType: "bin.gz"), !modelPath.isEmpty else {
+            self.initError = "Missing neural network model.bin.gz file"
+            return
+        }
+
+        // Resolve a safe, writable directory for logs and configurations (e.g., Caches Directory)
+        let paths = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)
+        let storagePath = paths.first?.path ?? NSTemporaryDirectory()
+
         DispatchQueue.global(qos: .userInitiated).async {
-            if engine.initEngine(withConfig: configPath, model: modelPath) == 0 {
-                DispatchQueue.main.async { self.bridge = engine; self.isEngineInitialized = true; checkAiTurn() }
+            let status = engine.initEngine(withConfig: configPath, model: modelPath, storage: storagePath)
+            if status == 0 {
+                DispatchQueue.main.async {
+                    self.bridge = engine
+                    self.isEngineInitialized = true
+                    self.initError = nil
+                    checkAiTurn()
+                }
+            } else {
+                DispatchQueue.main.async {
+                    self.initError = "KataGo failed to initialize (Error Code: \(status))"
+                }
             }
         }
     }

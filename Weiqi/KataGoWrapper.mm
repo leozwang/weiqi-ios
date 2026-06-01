@@ -20,8 +20,8 @@
     delete bridge;
 }
 
-- (int)initEngineWithConfig:(NSString *)configPath model:(NSString *)modelPath {
-    return bridge->initEngine([configPath UTF8String], [modelPath UTF8String]);
+- (int)initEngineWithConfig:(NSString *)configPath model:(NSString *)modelPath storage:(NSString *)storagePath {
+    return bridge->initEngine([configPath UTF8String], [modelPath UTF8String], [storagePath UTF8String]);
 }
 
 - (NSString *)sendGtpCommand:(NSString *)command {

@@ -48,7 +48,7 @@ KataGoBridge::~KataGoBridge() {
     shutdown();
 }
 
-int KataGoBridge::initEngine(const std::string& configPath, const std::string& modelPath) {
+int KataGoBridge::initEngine(const std::string& configPath, const std::string& modelPath, const std::string& storagePath) {
     std::lock_guard<std::mutex> lock(engineMutex);
     if (initialized) return 0;
 
@@ -61,9 +61,8 @@ int KataGoBridge::initEngine(const std::string& configPath, const std::string& m
         cfg.overrideKey("logToStderr", "false");
         cfg.overrideKey("logSearchInfoInterval", "-1");
         
-        std::string internalDir = configPath.substr(0, configPath.find_last_of("/"));
-        cfg.overrideKey("logDir", internalDir + "/temp_logs");
-        cfg.overrideKey("homeDataDir", internalDir);
+        cfg.overrideKey("logDir", storagePath + "/temp_logs");
+        cfg.overrideKey("homeDataDir", storagePath);
 
         Setup::initializeSession(cfg);
         logger = std::make_unique<Logger>(&cfg);
@@ -91,7 +90,12 @@ int KataGoBridge::initEngine(const std::string& configPath, const std::string& m
         bot->setPosition(pla, board, hist);
 
         initialized = true;
+    } catch (const std::exception& e) {
+        std::cerr << "KataGo Initialization Exception: " << e.what() << std::endl;
+        initialized = false;
+        return -1;
     } catch (...) {
+        std::cerr << "KataGo Initialization Unknown Exception occurred." << std::endl;
         initialized = false;
         return -1;
     }
