@@ -22,7 +22,7 @@ struct GameView: View {
     @State private var consecutivePasses = 0
     
     @State private var pendingSettings = GameSettings()
-    @State private var currentVisits: Int = 1000
+    @State private var currentVisits: Int = 500
 
     private let backgroundColor = Color(red: 24/255, green: 24/255, blue: 28/255)
     private let accentColor = Color(red: 100/255, green: 200/255, blue: 255/255)
@@ -387,35 +387,153 @@ struct SettingsView: View {
     var onStart: () -> Void
     @Environment(\.presentationMode) var presentationMode
     
+    @ObservedObject private var storeManager = StoreManager.shared
+    
     private let levels: [(String, Int)] = [("Easy", 100), ("Amateur", 500), ("Advanced", 1000), ("Pro", 2500)]
     
     var body: some View {
         NavigationView {
-            Form {
-                Section(header: Text("Play As")) {
-                    Picker("Mode", selection: $settings.mode) {
-                        ForEach(GameMode.allCases, id: \.self) { (mode: GameMode) in
-                            Text(LocalizedStringKey(mode.rawValue)).tag(mode)
+            VStack(spacing: 0) {
+                Form {
+                    Section(header: Text("AI Strength")) {
+                        VStack(alignment: .leading, spacing: 12) {
+                            HStack(spacing: 8) {
+                                ForEach(levels, id: \.1) { level in
+                                    let isLocked = (level.0 == "Advanced" || level.0 == "Pro") && !storeManager.isPurchased
+                                    Button(action: {
+                                        visits = level.1
+                                    }) {
+                                        VStack(spacing: 4) {
+                                            HStack(spacing: 4) {
+                                                Text(LocalizedStringKey(level.0))
+                                                    .font(.system(size: 14, weight: .bold))
+                                                if isLocked {
+                                                    Image(systemName: "lock.fill")
+                                                        .font(.system(size: 10))
+                                                        .foregroundColor(.orange)
+                                                }
+                                            }
+                                            Text("\(level.1) visits")
+                                                .font(.system(size: 10))
+                                                .foregroundColor(visits == level.1 ? .white.opacity(0.8) : .gray)
+                                        }
+                                        .frame(maxWidth: .infinity)
+                                        .padding(.vertical, 8)
+                                        .background(
+                                            RoundedRectangle(cornerRadius: 8)
+                                                .fill(visits == level.1 ? Color.blue : Color.white.opacity(0.08))
+                                        )
+                                        .foregroundColor(visits == level.1 ? .white : .primary)
+                                    }
+                                    .buttonStyle(.plain)
+                                }
+                            }
+                            if !storeManager.isPurchased {
+                                HStack(spacing: 8) {
+                                    Image(systemName: "sparkles")
+                                        .font(.system(size: 16, weight: .bold))
+                                        .foregroundColor(.orange)
+                                    Text("One-time purchase unlocks Advanced and Pro levels forever.")
+                                        .font(.system(size: 15, weight: .bold))
+                                        .foregroundColor(.orange)
+                                        .multilineTextAlignment(.leading)
+                                }
+                                .padding(.vertical, 12)
+                                .padding(.horizontal, 12)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .background(Color.orange.opacity(0.12))
+                                .cornerRadius(8)
+                            }
                         }
-                    }.pickerStyle(.inline)
-                }
-                
-                Section(header: Text("Handicap")) {
-                    Stepper("\(settings.handicap) Stones", value: $settings.handicap, in: 0...9)
-                }
-                
-                Section(header: Text("AI Strength")) {
-                    Picker("Strength", selection: $visits) {
-                        ForEach(levels, id: \.1) { (level: (String, Int)) in
-                            Text(LocalizedStringKey(level.0)).tag(level.1)
-                        }
-                    }.pickerStyle(.segmented)
+                        .listRowBackground(Color.clear)
+                        .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0))
+                    }
                     
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text(LocalizedStringKey("\(visits) visits per move"))
-                            .font(.caption)
-                            .foregroundColor(.gray)
-                        
+                    Section(header: Text("Play As")) {
+                        Picker("Mode", selection: $settings.mode) {
+                            ForEach(GameMode.allCases, id: \.self) { (mode: GameMode) in
+                                Text(LocalizedStringKey(mode.rawValue)).tag(mode)
+                            }
+                        }.pickerStyle(.inline)
+                    }
+                    
+                    Section(header: Text("Handicap")) {
+                        Stepper("\(settings.handicap) Stones", value: $settings.handicap, in: 0...9)
+                    }
+                }
+                
+                // Bottom panel containing Paywall / Start button
+                VStack {
+                    Divider()
+                        .padding(.bottom, 8)
+                    
+                    let isCurrentLevelLocked = (visits >= 1000) && !storeManager.isPurchased
+                    if isCurrentLevelLocked {
+                        VStack(spacing: 12) {
+                            Text("Unlock Elite Levels")
+                                .font(.system(size: 16, weight: .bold))
+                                .foregroundColor(.orange)
+                            Text("Advanced and Pro levels require high computational budget and utilize deep search. Unlock permanently to play at master level.")
+                                .font(.system(size: 13))
+                                .foregroundColor(.gray)
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal, 8)
+                            
+                            if let product = storeManager.product {
+                                Button(action: {
+                                    Task {
+                                        await storeManager.purchase()
+                                    }
+                                }) {
+                                    if storeManager.isPurchasing {
+                                        ProgressView()
+                                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                    } else {
+                                        Text("Unlock for \(product.displayPrice)")
+                                            .font(.system(size: 15, weight: .bold))
+                                    }
+                                }
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 48)
+                                .background(Color.orange)
+                                .foregroundColor(.white)
+                                .cornerRadius(24)
+                                .disabled(storeManager.isPurchasing)
+                            } else {
+                                Button(action: {
+                                    Task {
+                                        await storeManager.loadProducts()
+                                    }
+                                }) {
+                                    Text("Load Store Info")
+                                        .font(.system(size: 15, weight: .bold))
+                                }
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 48)
+                                .background(Color.gray)
+                                .foregroundColor(.white)
+                                .cornerRadius(24)
+                            }
+                            
+                            Button(action: {
+                                Task {
+                                    await storeManager.restorePurchases()
+                                }
+                            }) {
+                                Text("Restore Purchases")
+                                    .font(.system(size: 13, weight: .semibold))
+                                    .foregroundColor(.blue)
+                            }
+                            .disabled(storeManager.isPurchasing)
+                            
+                            if let error = storeManager.errorMessage {
+                                Text(error)
+                                    .font(.system(size: 12))
+                                    .foregroundColor(.red)
+                                    .multilineTextAlignment(.center)
+                            }
+                        }
+                    } else {
                         Button(action: onStart) {
                             Text("START GAME")
                                 .font(.system(size: 16, weight: .black))
@@ -426,9 +544,9 @@ struct SettingsView: View {
                                 .cornerRadius(25)
                         }
                     }
-                    .listRowBackground(Color.clear)
-                    .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0))
                 }
+                .padding([.horizontal, .bottom])
+                .background(Color(UIColor.systemGroupedBackground))
             }
             .navigationTitle("New Game")
             .navigationBarItems(trailing: Button("Cancel") { presentationMode.wrappedValue.dismiss() })

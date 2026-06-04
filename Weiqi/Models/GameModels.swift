@@ -25,7 +25,7 @@ enum GameMode: String, CaseIterable {
 struct GameSettings {
     var mode: GameMode = .userBlack
     var handicap: Int = 0
-    var visits: Int = 1000
+    var visits: Int = 500
     var modelName: String = "model.bin.gz"
 }
 

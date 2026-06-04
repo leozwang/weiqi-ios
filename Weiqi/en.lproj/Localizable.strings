@@ -25,3 +25,11 @@
 "You" = "You";
 "Captures: 0" = "Captures: 0";
 "%d visits per move" = "%d visits per move";
+"Unlock Elite Levels" = "Unlock Elite Levels";
+"Advanced and Pro levels require high computational budget and utilize deep search. Unlock permanently to play at master level." = "Advanced and Pro levels require high computational budget and utilize deep search. Unlock permanently to play at master level.";
+"Unlock for %@" = "Unlock for %@";
+"Load Store Info" = "Load Store Info";
+"Restore Purchases" = "Restore Purchases";
+"One-time purchase unlocks Advanced and Pro levels forever." = "One-time purchase unlocks Advanced and Pro levels forever.";
+
+

@@ -25,3 +25,11 @@
 "You" = "您";
 "Captures: 0" = "提子: 0";
 "%d visits per move" = "每步计算 %d 次";
+"Unlock Elite Levels" = "解锁精英级别";
+"Advanced and Pro levels require high computational budget and utilize deep search. Unlock permanently to play at master level." = "专业和职业级别需要高计算资源并使用深度搜索。永久解锁以体验大师级对弈。";
+"Unlock for %@" = "解锁需 %@";
+"Load Store Info" = "加载商店信息";
+"Restore Purchases" = "恢复购买";
+"One-time purchase unlocks Advanced and Pro levels forever." = "一次性购买即可永久解锁专业和职业级别。";
+
+

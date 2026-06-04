@@ -1,0 +1,72 @@
+{
+  "identifier" : "E2B7A843",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+    {
+      "displayVersion" : 1,
+      "familyShareable" : true,
+      "internalID" : "C7E9D18A",
+      "localizations" : [
+        {
+          "description" : "Unlock Advanced and Pro levels of KataGo forever.",
+          "displayName" : "Unlock Elite Levels",
+          "locale" : "en_US"
+        },
+        {
+          "description" : "永久解锁 KataGo 的专业与职业级别。",
+          "displayName" : "解锁精英级别",
+          "locale" : "zh_CN"
+        },
+        {
+          "description" : "KataGoの上級・プロレベルを永久にアンロックします。",
+          "displayName" : "エリートレベルをアンロック",
+          "locale" : "ja"
+        }
+      ],
+      "productID" : "com.cwave.weiqi.unlock_levels",
+      "referenceName" : "Unlock Levels",
+      "type" : "NonConsumable"
+    }
+  ],
+  "settings" : {
+    "_failTransactionsEnabled" : false,
+    "_locale" : "en_US",
+    "_storefront" : "USA",
+    "_storeKitErrors" : [
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Load Products"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Purchase"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Refund Request"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Subscription Status"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Verification"
+      }
+    ]
+  },
+  "subscriptionGroups" : [
+
+  ],
+  "version" : {
+    "major" : 2,
+    "minor" : 0
+  }
+}

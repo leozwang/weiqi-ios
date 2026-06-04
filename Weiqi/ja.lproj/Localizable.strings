@@ -25,3 +25,11 @@
 "You" = "あなた";
 "Captures: 0" = "アゲハマ: 0";
 "%d visits per move" = "1手あたり %d 手読む";
+"Unlock Elite Levels" = "エリートレベルをアンロック";
+"Advanced and Pro levels require high computational budget and utilize deep search. Unlock permanently to play at master level." = "上級・プロレベルは高い計算能力を必要とし、深層探索を使用します。永久にアンロックして、マスターレベルでプレイしましょう。";
+"Unlock for %@" = "%@でアンロック";
+"Load Store Info" = "ストア情報を読み込む";
+"Restore Purchases" = "購入履歴を復元";
+"One-time purchase unlocks Advanced and Pro levels forever." = "一回限りの購入で、上級・プロレベルが永久に有効になります。";
+
+
