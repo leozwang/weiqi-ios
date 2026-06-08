@@ -23,6 +23,8 @@ struct GameView: View {
     
     @State private var pendingSettings = GameSettings()
     @State private var currentVisits: Int = 500
+    @State private var showPassAlert = false
+    @State private var passAlertMessage = ""
 
     private let backgroundColor = Color(red: 24/255, green: 24/255, blue: 28/255)
     private let accentColor = Color(red: 100/255, green: 200/255, blue: 255/255)
@@ -185,6 +187,30 @@ struct GameView: View {
                 }
                 .padding(.horizontal, 20).padding(.bottom, 30)
             }
+            
+            if showPassAlert {
+                VStack {
+                    Spacer().frame(height: 120)
+                    HStack(spacing: 8) {
+                        Image(systemName: "info.circle.fill")
+                            .foregroundColor(.orange)
+                            .font(.system(size: 18, weight: .bold))
+                        Text(passAlertMessage)
+                            .font(.system(size: 15, weight: .bold))
+                            .foregroundColor(.white)
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 12)
+                    .background(Capsule().fill(Color(red: 30/255, green: 30/255, blue: 35/255)))
+                    .overlay(Capsule().stroke(Color.orange, lineWidth: 1.5))
+                    .shadow(color: Color.black.opacity(0.4), radius: 6, y: 3)
+                    
+                    Spacer()
+                }
+                .ignoresSafeArea()
+                .transition(.move(edge: .top).combined(with: .opacity))
+                .zIndex(10)
+            }
         }
         .preferredColorScheme(.dark)
         .onAppear {
@@ -244,6 +270,9 @@ struct GameView: View {
                 if let response = res, response.hasPrefix("=") {
                     let moveStr = response.replacingOccurrences(of: "= ", with: "").trimmingCharacters(in: .whitespacesAndNewlines)
                     if moveStr.uppercased() == "PASS" {
+                        let aiColor = currentTurn == .black ? NSLocalizedString("Black", comment: "") : NSLocalizedString("White", comment: "")
+                        let format = NSLocalizedString("AI (%@) Passed", comment: "")
+                        showPassReminder(message: String(format: format, aiColor))
                         currentTurn = (currentTurn == .black ? .white : .black); consecutivePasses += 1
                         if consecutivePasses >= 2 { finishGame() }
                     } else if let pos = fromGtpCoord(moveStr) {
@@ -253,6 +282,18 @@ struct GameView: View {
                     if showAnalysis { triggerAnalysis() }
                     if gameMode == .aiBoth && finalScore == nil { DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { checkAiTurn() } }
                 }
+            }
+        }
+    }
+
+    private func showPassReminder(message: String) {
+        passAlertMessage = message
+        withAnimation(.spring()) {
+            showPassAlert = true
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
+            withAnimation {
+                showPassAlert = false
             }
         }
     }

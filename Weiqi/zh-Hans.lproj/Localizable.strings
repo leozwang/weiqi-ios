@@ -31,5 +31,7 @@
 "Load Store Info" = "加载商店信息";
 "Restore Purchases" = "恢复购买";
 "One-time purchase unlocks Advanced and Pro levels forever." = "一次性购买即可永久解锁专业和职业级别。";
-
+"Black" = "黑棋";
+"White" = "白棋";
+"AI (%@) Passed" = "AI (%@) 选择停一手";
 

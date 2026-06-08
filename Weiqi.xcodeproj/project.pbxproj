@@ -128,7 +128,7 @@
 		2B6492D02B4DE3EAA4C9D570 /* searchnodetable.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = searchnodetable.h; sourceTree = "<group>"; };
 		2C40768D6B88365895DD02C3 /* rules.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = rules.cpp; sourceTree = "<group>"; };
 		2CB2A62BE699AF1CCE6E885A /* gtpconfig.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = gtpconfig.cpp; sourceTree = "<group>"; };
-		2D8763B8B239EE7716E9687C /* gtp.cfg */ = {isa = PBXFileReference; lastKnownFileType = text; path = gtp.cfg; sourceTree = "<group>"; };
+		2D8763B8B239EE7716E9687C /* gtp.cfg */ = {isa = PBXFileReference; path = gtp.cfg; sourceTree = "<group>"; };
 		2F07BE10554315E262704D05 /* trainingwrite.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = trainingwrite.h; sourceTree = "<group>"; };
 		3218E93095AE26DAFE1A6CAA /* asyncbot.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = asyncbot.h; sourceTree = "<group>"; };
 		340484DFC30CCAEB5D02DA43 /* mainargs.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mainargs.h; sourceTree = "<group>"; };
@@ -174,7 +174,7 @@
 		7D94D5D9EC283000F8F7BEA7 /* loadmodel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = loadmodel.h; sourceTree = "<group>"; };
 		7E95D52960F77568DB6E3FD8 /* KataGoWrapper.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = KataGoWrapper.mm; sourceTree = "<group>"; };
 		7F1364D28FAAD5F402B2D74D /* rules.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = rules.h; sourceTree = "<group>"; };
-		7F3F0EFE1913FD6072429223 /* Products.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = Products.storekit; sourceTree = "<group>"; };
+		7F3F0EFE1913FD6072429223 /* Products.storekit */ = {isa = PBXFileReference; path = Products.storekit; sourceTree = "<group>"; };
 		832E38E0CDBFFFDBF69814F3 /* searchnode.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = searchnode.cpp; sourceTree = "<group>"; };
 		848CBC96996F470A1936AF8C /* poswriter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = poswriter.h; sourceTree = "<group>"; };
 		85110C2C422D4B2594E7101A /* sha2.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = sha2.h; sourceTree = "<group>"; };
@@ -183,7 +183,7 @@
 		86AB4A03D494B34C1B89D901 /* threadsafequeue.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = threadsafequeue.h; sourceTree = "<group>"; };
 		870B8A9E2BAB5D7C2403E4A6 /* config_parser.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = config_parser.cpp; sourceTree = "<group>"; };
 		872FAA6468325FBB17A87ED6 /* Weiqi-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Weiqi-Bridging-Header.h"; sourceTree = "<group>"; };
-		8977E8D86DB48A7B44B47C60 /* Weiqi.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Weiqi.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8977E8D86DB48A7B44B47C60 /* Weiqi.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Weiqi.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		90C4CC6A86A9226A35D173AB /* book.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = book.h; sourceTree = "<group>"; };
 		9126D69263D433F46A2314A2 /* logger.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = logger.h; sourceTree = "<group>"; };
 		929B737A70D1F22CE0595276 /* eigenbackend.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = eigenbackend.cpp; sourceTree = "<group>"; };
@@ -238,7 +238,7 @@
 		BF6865B108808BF69ED23B62 /* searchnode.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = searchnode.h; sourceTree = "<group>"; };
 		CA27A8B6FE38BB477C4B5992 /* commontypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = commontypes.h; sourceTree = "<group>"; };
 		CC6221945B123E2A9FF893A0 /* GameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameView.swift; sourceTree = "<group>"; };
-		CE4C6CB23D246D25DE9E0476 /* cudahelpers.cu */ = {isa = PBXFileReference; lastKnownFileType = text; path = cudahelpers.cu; sourceTree = "<group>"; };
+		CE4C6CB23D246D25DE9E0476 /* cudahelpers.cu */ = {isa = PBXFileReference; path = cudahelpers.cu; sourceTree = "<group>"; };
 		D0D0A60260F3AC687988FAA7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		D1D1D506A6D82F4BF4E75A0B /* searchprint.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = searchprint.cpp; sourceTree = "<group>"; };
 		D2F2EF614DA5C6A0CB1769D8 /* evalcache.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = evalcache.h; sourceTree = "<group>"; };
@@ -601,7 +601,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastUpgradeCheck = 2620;
+				LastUpgradeCheck = 1430;
 				TargetAttributes = {
 					C2901A127A1A89283470A03C = {
 						DevelopmentTeam = 5QS428JSKE;
@@ -757,7 +757,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -789,10 +788,8 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = 5QS428JSKE;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -806,7 +803,6 @@
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;
@@ -818,7 +814,8 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 8;
+				DEVELOPMENT_TEAM = 5QS428JSKE;
 				HEADER_SEARCH_PATHS = (
 					"$(SRCROOT)/Weiqi/external/katago/cpp",
 					"$(SRCROOT)/Weiqi/external/katago/cpp/external",
@@ -832,18 +829,8 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.6;
-				OTHER_CPLUSPLUSFLAGS = (
-					"-std=c++20",
-					"-DUSE_EIGEN_BACKEND",
-					"-DNO_GIT_REVISION",
-					"-DNO_LIBZIP",
-					"-Wno-documentation",
-					"-Wno-documentation-deprecated-sync",
-					"-Wno-deprecated-anon-enum-enum-conversion",
-					"-Wno-unused-variable",
-					"-Wno-shorten-64-to-32\n",
-				);
+				MARKETING_VERSION = 1.7;
+				OTHER_CPLUSPLUSFLAGS = "-std=c++20 -DUSE_EIGEN_BACKEND -DNO_GIT_REVISION -DNO_LIBZIP -Wno-documentation -Wno-documentation-deprecated-sync -Wno-deprecated-anon-enum-enum-conversion -Wno-unused-variable -Wno-shorten-64-to-32\n";
 				OTHER_LDFLAGS = "-lz";
 				PRODUCT_BUNDLE_IDENTIFIER = com.cwave.weiqi;
 				SDKROOT = iphoneos;
@@ -858,7 +845,8 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 8;
+				DEVELOPMENT_TEAM = 5QS428JSKE;
 				HEADER_SEARCH_PATHS = (
 					"$(SRCROOT)/Weiqi/external/katago/cpp",
 					"$(SRCROOT)/Weiqi/external/katago/cpp/external",
@@ -872,18 +860,8 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.6;
-				OTHER_CPLUSPLUSFLAGS = (
-					"-std=c++20",
-					"-DUSE_EIGEN_BACKEND",
-					"-DNO_GIT_REVISION",
-					"-DNO_LIBZIP",
-					"-Wno-documentation",
-					"-Wno-documentation-deprecated-sync",
-					"-Wno-deprecated-anon-enum-enum-conversion",
-					"-Wno-unused-variable",
-					"-Wno-shorten-64-to-32\n",
-				);
+				MARKETING_VERSION = 1.7;
+				OTHER_CPLUSPLUSFLAGS = "-std=c++20 -DUSE_EIGEN_BACKEND -DNO_GIT_REVISION -DNO_LIBZIP -Wno-documentation -Wno-documentation-deprecated-sync -Wno-deprecated-anon-enum-enum-conversion -Wno-unused-variable -Wno-shorten-64-to-32\n";
 				OTHER_LDFLAGS = "-lz";
 				PRODUCT_BUNDLE_IDENTIFIER = com.cwave.weiqi;
 				SDKROOT = iphoneos;
@@ -897,7 +875,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -929,10 +906,8 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				DEVELOPMENT_TEAM = 5QS428JSKE;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -953,7 +928,6 @@
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;

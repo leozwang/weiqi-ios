@@ -31,5 +31,7 @@
 "Load Store Info" = "ストア情報を読み込む";
 "Restore Purchases" = "購入履歴を復元";
 "One-time purchase unlocks Advanced and Pro levels forever." = "一回限りの購入で、上級・プロレベルが永久に有効になります。";
-
+"Black" = "黒";
+"White" = "白";
+"AI (%@) Passed" = "AI（%@）がパスしました";
 
