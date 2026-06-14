@@ -60,3 +60,32 @@ struct AnalysisResult {
     var ownership: [Double] = Array(repeating: 0.0, count: 361)
     var candidates: [CandidateMove] = []
 }
+
+struct PersistedMove: Codable {
+    let x: Int
+    let y: Int
+    let isPass: Bool
+    let stone: Int
+}
+
+extension PersistedMove {
+    static let userDefaultsKey = "com.cwave.weiqi.persisted_moves"
+    
+    static func loadAll() -> [PersistedMove] {
+        if let data = UserDefaults.standard.data(forKey: userDefaultsKey),
+           let moves = try? JSONDecoder().decode([PersistedMove].self, from: data) {
+            return moves
+        }
+        return []
+    }
+    
+    static func saveAll(_ moves: [PersistedMove]) {
+        if let data = try? JSONEncoder().encode(moves) {
+            UserDefaults.standard.set(data, forKey: userDefaultsKey)
+        }
+    }
+    
+    static func clear() {
+        UserDefaults.standard.removeObject(forKey: userDefaultsKey)
+    }
+}

@@ -17,8 +17,8 @@ struct GameView: View {
     @State private var showGameOverDialog = false
     @State private var showSettings = false
     
-    @State private var moveHistory: [(Int, Int, Stone)] = []
-    @State private var redoStack: [(Int, Int, Stone)] = []
+    @State private var moveHistory: [PersistedMove] = []
+    @State private var redoStack: [PersistedMove] = []
     @State private var consecutivePasses = 0
     
     @State private var pendingSettings = GameSettings()
@@ -249,9 +249,19 @@ struct GameView: View {
 
     private func executeMove(x: Int, y: Int) {
         guard let engine = bridge else { return }
+        let turnVal = currentTurn.rawValue
         if engine.sendGtpCommand("play \(currentTurn == .black ? "black" : "white") \(toGtpCoord(x: x, y: y))")?.hasPrefix("=") == true {
-            moveHistory.append((x, y, currentTurn)); redoStack.removeAll(); boardState[y][x] = currentTurn
-            lastMove = (x, y); previewMove = nil; currentTurn = (currentTurn == .black ? .white : .black); consecutivePasses = 0
+            let move = PersistedMove(x: x, y: y, isPass: false, stone: turnVal)
+            moveHistory.append(move)
+            redoStack.removeAll()
+            boardState[y][x] = currentTurn
+            lastMove = (x, y)
+            previewMove = nil
+            currentTurn = (currentTurn == .black ? .white : .black)
+            consecutivePasses = 0
+            
+            PersistedMove.saveAll(moveHistory)
+            
             if showAnalysis { triggerAnalysis() }
             checkAiTurn()
         }
@@ -259,8 +269,16 @@ struct GameView: View {
 
     private func handlePass() {
         guard let engine = bridge, !isThinking, finalScore == nil else { return }
+        let turnVal = currentTurn.rawValue
         if engine.sendGtpCommand("play \(currentTurn == .black ? "black" : "white") pass")?.hasPrefix("=") == true {
-            previewMove = nil; currentTurn = (currentTurn == .black ? .white : .black); consecutivePasses += 1
+            let move = PersistedMove(x: -1, y: -1, isPass: true, stone: turnVal)
+            moveHistory.append(move)
+            previewMove = nil
+            currentTurn = (currentTurn == .black ? .white : .black)
+            consecutivePasses += 1
+            
+            PersistedMove.saveAll(moveHistory)
+            
             if consecutivePasses >= 2 { finishGame() } else { if showAnalysis { triggerAnalysis() }; checkAiTurn() }
         }
     }
@@ -283,11 +301,25 @@ struct GameView: View {
                         let aiColor = currentTurn == .black ? NSLocalizedString("Black", comment: "") : NSLocalizedString("White", comment: "")
                         let format = NSLocalizedString("AI (%@) Passed", comment: "")
                         showPassReminder(message: String(format: format, aiColor))
+                        
+                        let turnVal = currentTurn.rawValue
+                        let move = PersistedMove(x: -1, y: -1, isPass: true, stone: turnVal)
+                        moveHistory.append(move)
+                        
                         currentTurn = (currentTurn == .black ? .white : .black); consecutivePasses += 1
+                        
+                        PersistedMove.saveAll(moveHistory)
+                        
                         if consecutivePasses >= 2 { finishGame() }
                     } else if let pos = fromGtpCoord(moveStr) {
-                        moveHistory.append((pos.0, pos.1, currentTurn)); redoStack.removeAll(); boardState[pos.1][pos.0] = currentTurn
+                        let turnVal = currentTurn.rawValue
+                        let move = PersistedMove(x: pos.0, y: pos.1, isPass: false, stone: turnVal)
+                        moveHistory.append(move)
+                        redoStack.removeAll()
+                        boardState[pos.1][pos.0] = currentTurn
                         lastMove = pos; currentTurn = (currentTurn == .black ? .white : .black); consecutivePasses = 0
+                        
+                        PersistedMove.saveAll(moveHistory)
                     }
                     if showAnalysis { triggerAnalysis() }
                     if gameMode == .aiBoth && finalScore == nil { DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { checkAiTurn() } }
@@ -362,8 +394,9 @@ struct GameView: View {
                     self.bridge = engine
                     self.isEngineInitialized = true
                     self.initError = nil
-                    let saved = GameSettings.load()
-                    startNewGame(settings: saved, visits: saved.visits)
+                    let savedSettings = GameSettings.load()
+                    let savedMoves = PersistedMove.loadAll()
+                    restoreGame(settings: savedSettings, moves: savedMoves)
                 }
             } else {
                 DispatchQueue.main.async {
@@ -374,20 +407,70 @@ struct GameView: View {
     }
 
     private func startNewGame(settings: GameSettings, visits: Int) {
+        showSettings = false
+        let rawBoard = getFixedHandicapStones(count: settings.handicap)
+        let initialMoves = rawBoard.map { PersistedMove(x: $0.0, y: $0.1, isPass: false, stone: 1) }
+        PersistedMove.saveAll(initialMoves)
+        restoreGame(settings: settings, moves: initialMoves)
+    }
+
+    private func restoreGame(settings: GameSettings, moves: [PersistedMove]) {
         guard let engine = bridge else { return }
-        isThinking = true; showSettings = false
+        isThinking = true
         DispatchQueue.global(qos: .userInitiated).async {
-            engine.sendGtpCommand("clear_board"); engine.sendGtpCommand("set_max_visits \(visits)")
+            engine.sendGtpCommand("clear_board")
+            engine.sendGtpCommand("set_max_visits \(settings.visits)")
             engine.sendGtpCommand("komi \(settings.handicap > 0 ? 0.5 : 7.5)")
-            if settings.handicap > 0 { engine.sendGtpCommand("fixed_handicap \(settings.handicap)") }
-            let rawBoard = getFixedHandicapStones(count: settings.handicap)
+            if settings.handicap > 0 {
+                engine.sendGtpCommand("fixed_handicap \(settings.handicap)")
+            }
+            
+            let handicapCount = settings.handicap
+            var board = Array(repeating: Array(repeating: Stone.empty, count: 19), count: 19)
+            var history: [PersistedMove] = []
+            var last: (Int, Int)? = nil
+            var passes = 0
+            
+            for (index, move) in moves.enumerated() {
+                let stone = Stone(rawValue: move.stone) ?? .empty
+                if index < handicapCount {
+                    board[move.y][move.x] = stone
+                    history.append(move)
+                } else {
+                    let cmd = move.isPass ? "play \(move.stone == 1 ? "black" : "white") pass" : "play \(move.stone == 1 ? "black" : "white") \(toGtpCoord(x: move.x, y: move.y))"
+                    _ = engine.sendGtpCommand(cmd)
+                    
+                    history.append(move)
+                    if !move.isPass {
+                        board[move.y][move.x] = stone
+                        last = (move.x, move.y)
+                        passes = 0
+                    } else {
+                        passes += 1
+                    }
+                }
+            }
+            
+            let nextTurn: Stone
+            if moves.isEmpty {
+                nextTurn = settings.handicap > 0 ? .white : .black
+            } else {
+                nextTurn = (moves.last?.stone == 1) ? .white : .black
+            }
+            
             DispatchQueue.main.async {
-                boardState = Array(repeating: Array(repeating: .empty, count: 19), count: 19)
-                for pos in rawBoard { boardState[pos.1][pos.0] = .black }
-                lastMove = nil; previewMove = nil; finalScore = nil; analysis = AnalysisResult(); consecutivePasses = 0
-                moveHistory = rawBoard.map { ($0.0, $0.1, .black) }; redoStack.removeAll()
-                gameMode = settings.mode; currentTurn = settings.handicap > 0 ? .white : .black
-                isThinking = false; checkAiTurn()
+                boardState = board
+                lastMove = last
+                previewMove = nil
+                finalScore = nil
+                analysis = AnalysisResult()
+                consecutivePasses = passes
+                moveHistory = history
+                redoStack = []
+                gameMode = settings.mode
+                currentTurn = nextTurn
+                isThinking = false
+                checkAiTurn()
             }
         }
     }
@@ -404,15 +487,44 @@ struct GameView: View {
 
     private func undoMove() {
         guard !isThinking, let last = moveHistory.popLast() else { return }
-        bridge?.sendGtpCommand("undo"); redoStack.append(last); boardState[last.1][last.0] = .empty
-        lastMove = moveHistory.last.map { ($0.0, $0.1) }; currentTurn = last.2; consecutivePasses = 0
+        bridge?.sendGtpCommand("undo")
+        redoStack.append(last)
+        if !last.isPass {
+            boardState[last.y][last.x] = .empty
+        }
+        lastMove = moveHistory.last(where: { !$0.isPass }).map { ($0.x, $0.y) }
+        currentTurn = Stone(rawValue: last.stone) ?? .black
+        
+        var passes = 0
+        for m in moveHistory.reversed() {
+            if m.isPass {
+                passes += 1
+            } else {
+                break
+            }
+        }
+        consecutivePasses = passes
+        PersistedMove.saveAll(moveHistory)
+        
         if showAnalysis { triggerAnalysis() }
     }
     
     private func redoMove() {
         guard !isThinking, let next = redoStack.popLast() else { return }
-        if bridge?.sendGtpCommand("play \(next.2 == .black ? "black" : "white") \(toGtpCoord(x: next.0, y: next.1))")?.hasPrefix("=") == true {
-            moveHistory.append(next); boardState[next.1][next.0] = next.2; lastMove = (next.0, next.1); currentTurn = (next.2 == .black ? .white : .black); consecutivePasses = 0
+        let cmd = next.isPass ? "play \(next.stone == 1 ? "black" : "white") pass" : "play \(next.stone == 1 ? "black" : "white") \(toGtpCoord(x: next.x, y: next.y))"
+        if bridge?.sendGtpCommand(cmd)?.hasPrefix("=") == true {
+            moveHistory.append(next)
+            if !next.isPass {
+                boardState[next.y][next.x] = Stone(rawValue: next.stone) ?? .empty
+                lastMove = (next.x, next.y)
+                consecutivePasses = 0
+            } else {
+                lastMove = moveHistory.last(where: { !$0.isPass }).map { ($0.x, $0.y) }
+                consecutivePasses += 1
+            }
+            currentTurn = (next.stone == 1 ? .white : .black)
+            PersistedMove.saveAll(moveHistory)
+            
             if showAnalysis { triggerAnalysis() }
         }
     }
