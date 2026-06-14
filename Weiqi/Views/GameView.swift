@@ -214,6 +214,9 @@ struct GameView: View {
         }
         .preferredColorScheme(.dark)
         .onAppear {
+            let saved = GameSettings.load()
+            pendingSettings = saved
+            currentVisits = saved.visits
             // Sequential loading: wait a bit before starting engine
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                 initializeEngine()
@@ -221,7 +224,14 @@ struct GameView: View {
         }
         .sheet(isPresented: $showSettings) {
             SettingsView(settings: $pendingSettings, visits: $currentVisits) {
+                pendingSettings.visits = currentVisits
+                pendingSettings.save()
                 startNewGame(settings: pendingSettings, visits: currentVisits)
+            }
+            .onAppear {
+                let saved = GameSettings.load()
+                pendingSettings = saved
+                currentVisits = saved.visits
             }
         }
         .alert("Game Over", isPresented: $showGameOverDialog) {
@@ -352,7 +362,8 @@ struct GameView: View {
                     self.bridge = engine
                     self.isEngineInitialized = true
                     self.initError = nil
-                    checkAiTurn()
+                    let saved = GameSettings.load()
+                    startNewGame(settings: saved, visits: saved.visits)
                 }
             } else {
                 DispatchQueue.main.async {

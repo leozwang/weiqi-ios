@@ -6,7 +6,7 @@ enum Stone: Int {
     case white = 2
 }
 
-enum GameMode: String, CaseIterable {
+enum GameMode: String, CaseIterable, Codable {
     case userBlack = "You are Black"
     case userWhite = "You are White"
     case userBoth = "Two Players"
@@ -22,11 +22,29 @@ enum GameMode: String, CaseIterable {
     }
 }
 
-struct GameSettings {
+struct GameSettings: Codable {
     var mode: GameMode = .userBlack
     var handicap: Int = 0
     var visits: Int = 500
     var modelName: String = "model.bin.gz"
+}
+
+extension GameSettings {
+    static let userDefaultsKey = "com.cwave.weiqi.game_settings"
+    
+    static func load() -> GameSettings {
+        if let data = UserDefaults.standard.data(forKey: userDefaultsKey),
+           let settings = try? JSONDecoder().decode(GameSettings.self, from: data) {
+            return settings
+        }
+        return GameSettings()
+    }
+    
+    func save() {
+        if let data = try? JSONEncoder().encode(self) {
+            UserDefaults.standard.set(data, forKey: Self.userDefaultsKey)
+        }
+    }
 }
 
 struct CandidateMove {
