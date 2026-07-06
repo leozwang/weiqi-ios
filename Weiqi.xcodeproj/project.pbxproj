@@ -818,7 +818,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 10;
+				CURRENT_PROJECT_VERSION = 11;
 				HEADER_SEARCH_PATHS = (
 					"$(SRCROOT)/Weiqi/external/katago/cpp",
 					"$(SRCROOT)/Weiqi/external/katago/cpp/external",
@@ -832,7 +832,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.9;
+				MARKETING_VERSION = 1.10;
 				OTHER_CPLUSPLUSFLAGS = (
 					"-std=c++20",
 					"-DUSE_EIGEN_BACKEND",
@@ -858,7 +858,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 10;
+				CURRENT_PROJECT_VERSION = 11;
 				HEADER_SEARCH_PATHS = (
 					"$(SRCROOT)/Weiqi/external/katago/cpp",
 					"$(SRCROOT)/Weiqi/external/katago/cpp/external",
@@ -872,7 +872,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.9;
+				MARKETING_VERSION = 1.10;
 				OTHER_CPLUSPLUSFLAGS = (
 					"-std=c++20",
 					"-DUSE_EIGEN_BACKEND",
