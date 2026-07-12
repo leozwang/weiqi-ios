@@ -188,11 +188,11 @@ std::string KataGoBridge::sendGtpCommand(const std::string& command) {
     if (mainCmd == "final_score") {
         bot->stopAndWait();
         BoardHistory histCopy = bot->getRootHist();
-        float score = PlayUtils::computeLead(bot->getSearchStopAndWait(), NULL, bot->getRootBoard(), histCopy, P_WHITE, 500, OtherGameProperties());
+        float score = PlayUtils::computeLead(bot->getSearchStopAndWait(), NULL, bot->getRootBoard(), histCopy, bot->getRootPla(), 500, OtherGameProperties());
         std::string resp = "= ";
         if (score == 0) resp += "0";
-        else if (score > 0) resp += "B+" + Global::strprintf("%.1f", score);
-        else resp += "W+" + Global::strprintf("%.1f", -score);
+        else if (score < 0) resp += "B+" + Global::strprintf("%.1f", -score);
+        else resp += "W+" + Global::strprintf("%.1f", score);
         return resp;
     }
 
