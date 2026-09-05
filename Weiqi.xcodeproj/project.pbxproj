@@ -16,6 +16,7 @@
 		15D5FA97545FDA5D0CCC9C9C /* mainargs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EB3153FC00213E4B2397A74C /* mainargs.cpp */; };
 		17676FB0A5B0006AE7C1DBED /* searchnode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 832E38E0CDBFFFDBF69814F3 /* searchnode.cpp */; };
 		19A09F3760F1B2151ABFF779 /* nneval.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AEC8C25DC73FF5558700B533 /* nneval.cpp */; };
+		19B0C51737577552559C3141 /* stone5.wav in Resources */ = {isa = PBXBuildFile; fileRef = 48399D7C2E8CA86761C29001 /* stone5.wav */; };
 		1EF92D05B0EA82D9043DA631 /* metalbackend.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDB978305222379D2A7FFFE /* metalbackend.swift */; };
 		21DFB37B3A1C5E0532460D6E /* searchupdatehelpers.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EEC27C38925CEECEE367B22B /* searchupdatehelpers.cpp */; };
 		22125B75A28D7EFF596BDD88 /* fileutils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 45EC2E31A5FF3388AADC8C82 /* fileutils.cpp */; };
@@ -23,6 +24,7 @@
 		29C648C2C89910C3E7CECE0C /* numpywrite.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 16788383816727C10419EE09 /* numpywrite.cpp */; };
 		2A583734CE0CAB76F311FC24 /* evalcache.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 42154A6519B7088DF22D946F /* evalcache.cpp */; };
 		2C6BB13A8DEABEFBDE9B51B2 /* setup.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FFE99FFE6F7053840DCADE39 /* setup.cpp */; };
+		2D09C8C6FF2D871411430135 /* stone3.wav in Resources */ = {isa = PBXBuildFile; fileRef = C677A596F5D4B8591DA68510 /* stone3.wav */; };
 		2DAC082DA639EB117508043D /* hash.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 40B90FA126E6BFAF0AD65E70 /* hash.cpp */; };
 		32A6741FFB18C7F674D774CB /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 22A0B0F1D4634F6F49EB9331 /* Assets.xcassets */; };
 		350311D0122CFDEA3B2400E3 /* distributiontable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4034036477229DCD3B5A9154 /* distributiontable.cpp */; };
@@ -31,6 +33,7 @@
 		3B2E096524A6325B6C436307 /* elo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 67D814362D4D0DB67890AE59 /* elo.cpp */; };
 		3E6F9F941640459E3EFACCD0 /* analysisdata.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3ACE7CFC2A5414AA96CDECCA /* analysisdata.cpp */; };
 		3F10CE6FE97EDE3F2252142A /* gtp.cfg in Resources */ = {isa = PBXBuildFile; fileRef = 2D8763B8B239EE7716E9687C /* gtp.cfg */; };
+		44102FA430792660BD0499D0 /* stone4.wav in Resources */ = {isa = PBXBuildFile; fileRef = EE2B80A884F1F1B51C8A572A /* stone4.wav */; };
 		48F2851DD2A887FE8388A3B1 /* global.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DE111779C763CC96F26471EF /* global.cpp */; };
 		4C18E25CFC8FCE047F117566 /* Products.storekit in Resources */ = {isa = PBXBuildFile; fileRef = 7F3F0EFE1913FD6072429223 /* Products.storekit */; };
 		4EA7D7CE73A9F8640B81DCC7 /* subtreevaluebiastable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 950436051EB395DF63C2ED78 /* subtreevaluebiastable.cpp */; };
@@ -47,6 +50,7 @@
 		6525A579A4361566E7B79678 /* BoardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7358026E9B1EBD090B70129C /* BoardView.swift */; };
 		69285D196D36B465DEEBD89C /* book.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5D87FFB2F4907344714D0ACC /* book.cpp */; };
 		6C25EDC5761B452710D93E27 /* searchexplorehelpers.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7A4A592CD98AE187E4CE648F /* searchexplorehelpers.cpp */; };
+		6DE3F5D9B4D98F23901665C4 /* SoundManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA11B52E708CC71BB18D02A7 /* SoundManager.swift */; };
 		6DEAF2D4B9691BD84C59227E /* model.bin.gz in Resources */ = {isa = PBXBuildFile; fileRef = FA4AC2B40600F56692573BB2 /* model.bin.gz */; };
 		70D7B86B3C491547D44E03B5 /* timer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E7293503EE8F2B2B6F45C99C /* timer.cpp */; };
 		71E8FF2C7E1BBE875E324205 /* files.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D2F7E265D6673B49CD40226C /* files.cpp */; };
@@ -57,6 +61,7 @@
 		8645D80A82C7D85BA18B3BED /* play.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1959A80BFEF3F9FF6D190B95 /* play.cpp */; };
 		89DE1644070097537ECF7464 /* threadsafequeue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9FD64A7907F0AB9E8CBDA818 /* threadsafequeue.cpp */; };
 		8CEA46C1A9EF9405D9E73764 /* localpattern.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DCD2548EF7714165A6EEBD42 /* localpattern.cpp */; };
+		8D7D3CE9697A8F09108E4B61 /* stone2.wav in Resources */ = {isa = PBXBuildFile; fileRef = 353CF586CF6FACCB2F983C6B /* stone2.wav */; };
 		926D868F525A6906B2E3C614 /* parallel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AB198E7C3834507384197504 /* parallel.cpp */; };
 		931575AA442B677F1BB0AA44 /* loadmodel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F246285BBC858C1624E85D18 /* loadmodel.cpp */; };
 		9C9695DDD314462822285ABC /* rand_helpers.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A42803AA567B0587CCC77C12 /* rand_helpers.cpp */; };
@@ -85,6 +90,7 @@
 		C99701A0126EBE169FF46241 /* bsearch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FF2378D8A1C4655B9653F479 /* bsearch.cpp */; };
 		CAACCD5E48BA95C8433FC7B2 /* search.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5E7244C40EBEF5C2CAF286C /* search.cpp */; };
 		CC3FEEF77631A2279F7EA69E /* datetime.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DDD7D1C5519C7A97D82FEB49 /* datetime.cpp */; };
+		D5A0AAF16AD03B04FD47648E /* stone1.wav in Resources */ = {isa = PBXBuildFile; fileRef = 90D79359B1841544E4551E13 /* stone1.wav */; };
 		D9D49FBD438975E8CA990A13 /* md5.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A327A523AAF07A66E5085FDA /* md5.cpp */; };
 		DC234DDA787BF09898228304 /* version.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 21F76F87A19C76D783915ED4 /* version.cpp */; };
 		DDF1559066E0CAF7418448DE /* sgf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A650C7B71A75E741635C4A5B /* sgf.cpp */; };
@@ -147,6 +153,7 @@
 		3218E93095AE26DAFE1A6CAA /* asyncbot.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = asyncbot.h; sourceTree = "<group>"; };
 		340484DFC30CCAEB5D02DA43 /* mainargs.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mainargs.h; sourceTree = "<group>"; };
 		343BC8E1D3232443D633B72E /* searchprint.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = searchprint.h; sourceTree = "<group>"; };
+		353CF586CF6FACCB2F983C6B /* stone2.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = stone2.wav; sourceTree = "<group>"; };
 		35BB4B42C1EEED9F657E03B6 /* KataGoSwift-Swift.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "KataGoSwift-Swift.h"; sourceTree = "<group>"; };
 		37BCC115849BE85C1FEBC581 /* timecontrols.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = timecontrols.cpp; sourceTree = "<group>"; };
 		38CD326C997EE2F848FA79D2 /* fileutils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = fileutils.h; sourceTree = "<group>"; };
@@ -160,6 +167,7 @@
 		42D04230CF9236E441AFB3AE /* modelversion.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = modelversion.h; sourceTree = "<group>"; };
 		43750BD6FB2590C8BD8DAE86 /* threadtest.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = threadtest.h; sourceTree = "<group>"; };
 		45EC2E31A5FF3388AADC8C82 /* fileutils.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = fileutils.cpp; sourceTree = "<group>"; };
+		48399D7C2E8CA86761C29001 /* stone5.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = stone5.wav; sourceTree = "<group>"; };
 		49D37189B02567322518B1DA /* asyncbot.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = asyncbot.cpp; sourceTree = "<group>"; };
 		4C245958DBA2359157C924BD /* libKataGoSwift.a */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = archive.ar; path = libKataGoSwift.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		4C2F40CCC0A29EA438883063 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -201,6 +209,7 @@
 		872FAA6468325FBB17A87ED6 /* Weiqi-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Weiqi-Bridging-Header.h"; sourceTree = "<group>"; };
 		8977E8D86DB48A7B44B47C60 /* Weiqi.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Weiqi.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		90C4CC6A86A9226A35D173AB /* book.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = book.h; sourceTree = "<group>"; };
+		90D79359B1841544E4551E13 /* stone1.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = stone1.wav; sourceTree = "<group>"; };
 		9126D69263D433F46A2314A2 /* logger.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = logger.h; sourceTree = "<group>"; };
 		92EAB387DE4B16E48E0D5567 /* mutexpool.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mutexpool.h; sourceTree = "<group>"; };
 		932857C3688392780E44AB19 /* board.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = board.h; sourceTree = "<group>"; };
@@ -252,6 +261,7 @@
 		BDAF3B22A96CC0CB75F9EE86 /* distributiontable.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = distributiontable.h; sourceTree = "<group>"; };
 		BE56A0EE51BB109333ED5793 /* hash.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = hash.h; sourceTree = "<group>"; };
 		BF6865B108808BF69ED23B62 /* searchnode.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = searchnode.h; sourceTree = "<group>"; };
+		C677A596F5D4B8591DA68510 /* stone3.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = stone3.wav; sourceTree = "<group>"; };
 		CA27A8B6FE38BB477C4B5992 /* commontypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = commontypes.h; sourceTree = "<group>"; };
 		CC6221945B123E2A9FF893A0 /* GameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameView.swift; sourceTree = "<group>"; };
 		CE4C6CB23D246D25DE9E0476 /* cudahelpers.cu */ = {isa = PBXFileReference; path = cudahelpers.cu; sourceTree = "<group>"; };
@@ -280,6 +290,7 @@
 		EAD4307C91213528B798D0D5 /* sgfmetadata.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = sgfmetadata.h; sourceTree = "<group>"; };
 		EB3153FC00213E4B2397A74C /* mainargs.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = mainargs.cpp; sourceTree = "<group>"; };
 		ECDA18C250E65807487730A6 /* poswriter.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = poswriter.cpp; sourceTree = "<group>"; };
+		EE2B80A884F1F1B51C8A572A /* stone4.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = stone4.wav; sourceTree = "<group>"; };
 		EEC27C38925CEECEE367B22B /* searchupdatehelpers.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = searchupdatehelpers.cpp; sourceTree = "<group>"; };
 		F246285BBC858C1624E85D18 /* loadmodel.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = loadmodel.cpp; sourceTree = "<group>"; };
 		F347EBA67931D4007038C4B9 /* nninputs.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = nninputs.cpp; sourceTree = "<group>"; };
@@ -290,6 +301,7 @@
 		F656DD66AB213AF9BAF321CE /* config_parser.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = config_parser.h; sourceTree = "<group>"; };
 		F7177F1ACDCB547245AD9230 /* logger.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = logger.cpp; sourceTree = "<group>"; };
 		F8634A308F71FF44F1F5CBE2 /* boardhistory.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = boardhistory.h; sourceTree = "<group>"; };
+		FA11B52E708CC71BB18D02A7 /* SoundManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundManager.swift; sourceTree = "<group>"; };
 		FA4AC2B40600F56692573BB2 /* model.bin.gz */ = {isa = PBXFileReference; lastKnownFileType = archive.gzip; path = model.bin.gz; sourceTree = "<group>"; };
 		FA8B108BF30CE14221C78780 /* metalbackend.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = metalbackend.h; sourceTree = "<group>"; };
 		FF2378D8A1C4655B9653F479 /* bsearch.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = bsearch.cpp; sourceTree = "<group>"; };
@@ -355,12 +367,14 @@
 				9846CBECDE45DDFF280532E8 /* LaunchScreen.storyboard */,
 				7F3F0EFE1913FD6072429223 /* Products.storekit */,
 				AA3F4A309D4B7E34B1FAD3C8 /* SceneDelegate.swift */,
+				FA11B52E708CC71BB18D02A7 /* SoundManager.swift */,
 				A80233237016D236034C5103 /* StoreManager.swift */,
 				B5F02FB587E9C971FB65C4DB /* ViewController.swift */,
 				872FAA6468325FBB17A87ED6 /* Weiqi-Bridging-Header.h */,
 				792003B9424EDAE32E661D5B /* Assets */,
 				788E72FBBA43F5989E2063F9 /* Localizable.strings */,
 				7952E20A487E818EA97FF333 /* Models */,
+				D8F071109191C154F3E3F007 /* Sounds */,
 				54315030246B008262721238 /* Views */,
 			);
 			path = Weiqi;
@@ -455,6 +469,18 @@
 			);
 			name = search;
 			path = Weiqi/external/katago/cpp/search;
+			sourceTree = "<group>";
+		};
+		D8F071109191C154F3E3F007 /* Sounds */ = {
+			isa = PBXGroup;
+			children = (
+				90D79359B1841544E4551E13 /* stone1.wav */,
+				353CF586CF6FACCB2F983C6B /* stone2.wav */,
+				C677A596F5D4B8591DA68510 /* stone3.wav */,
+				EE2B80A884F1F1B51C8A572A /* stone4.wav */,
+				48399D7C2E8CA86761C29001 /* stone5.wav */,
+			);
+			path = Sounds;
 			sourceTree = "<group>";
 		};
 		E20D028B5F21530DD5DBF3F3 /* neuralnet */ = {
@@ -694,6 +720,11 @@
 				B9A614A025B99DCEACEBA28A /* cudahelpers.cu in Resources */,
 				3F10CE6FE97EDE3F2252142A /* gtp.cfg in Resources */,
 				6DEAF2D4B9691BD84C59227E /* model.bin.gz in Resources */,
+				D5A0AAF16AD03B04FD47648E /* stone1.wav in Resources */,
+				8D7D3CE9697A8F09108E4B61 /* stone2.wav in Resources */,
+				2D09C8C6FF2D871411430135 /* stone3.wav in Resources */,
+				44102FA430792660BD0499D0 /* stone4.wav in Resources */,
+				19B0C51737577552559C3141 /* stone5.wav in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -739,6 +770,7 @@
 				E0BB6B6A3E07F26AE283A610 /* KataGoBridge.cpp in Sources */,
 				228B60C6429784CF05AF388B /* KataGoWrapper.mm in Sources */,
 				A945F6D9DB1CD334E3F0CB0A /* SceneDelegate.swift in Sources */,
+				6DE3F5D9B4D98F23901665C4 /* SoundManager.swift in Sources */,
 				55FE10BD6D14C5A742C71849 /* StoreManager.swift in Sources */,
 				AB7D42A8B6AA4329F97F4F6D /* ViewController.swift in Sources */,
 				3E6F9F941640459E3EFACCD0 /* analysisdata.cpp in Sources */,

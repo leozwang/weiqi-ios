@@ -27,7 +27,8 @@
 "You're white" = "我执白";
 "Two Players" = "双人对弈";
 "AI vs AI" = "电脑自弈";
-"You" = "您";
+"Myself" = "我";
+"You" = "我";
 "Captures: 0" = "提子: 0";
 "%d visits per move" = "每步计算 %d 次";
 "Unlock Elite Levels" = "解锁精英级别";
@@ -39,4 +40,6 @@
 "Black" = "黑棋";
 "White" = "白棋";
 "AI (%@) Passed" = "AI (%@) 选择停一手";
+"Sound" = "声音";
+"Stone Sound" = "落子音效";
 

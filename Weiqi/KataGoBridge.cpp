@@ -212,9 +212,20 @@ std::string KataGoBridge::sendGtpCommand(const std::string& command) {
     }
 
     if (mainCmd == "kata-get-analysis") {
+        bot->stopAndWait();
         nlohmann::json json;
         Player perspective = P_BLACK;
         if (parts.size() >= 2 && (parts[1] == "white" || parts[1] == "w")) perspective = P_WHITE;
+        if (bot->getSearch()->getRootVisits() <= 0) {
+            try {
+                SearchParams oldParams = bot->getParams();
+                SearchParams newParams = oldParams;
+                newParams.maxVisits = 50; newParams.maxPlayouts = 50;
+                bot->setParamsNoClearing(newParams);
+                bot->genMoveSynchronous(bot->getRootPla(), TimeControls());
+                bot->setParamsNoClearing(oldParams);
+            } catch (...) {}
+        }
         if (!bot->getSearch()->getAnalysisJson(perspective, 10, false, true, true, false, false, false, true, false, json)) return "? failed";
         return "= " + json.dump();
     }

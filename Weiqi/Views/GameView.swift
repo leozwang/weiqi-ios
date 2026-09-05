@@ -33,21 +33,40 @@ struct GameView: View {
     private let accentColor = Color(red: 100/255, green: 200/255, blue: 255/255)
 
     var body: some View {
-        ZStack {
+        ZStack(alignment: .top) {
             backgroundColor.ignoresSafeArea()
             
             VStack(spacing: 0) {
                 // Top Navigation Bar
                 HStack {
-                    Button(action: {}) { Image(systemName: "line.3.horizontal").font(.system(size: 24)).foregroundColor(.white) }
+                    Button(action: {}) {
+                        Image(systemName: "line.3.horizontal")
+                            .font(.system(size: 24))
+                            .foregroundColor(.white)
+                            .frame(width: 44, height: 44)
+                    }
                     Spacer()
-                    Text(finalScore ?? "围棋 碁 GO!").font(.system(size: 18, weight: .black)).foregroundColor(.white).tracking(1)
+                    Text(finalScore ?? "围棋 碁 GO!")
+                        .font(.system(size: 18, weight: .black))
+                        .foregroundColor(.white)
+                        .tracking(1)
                     Spacer()
-                    Button(action: { showAnalysis.toggle(); if showAnalysis { triggerAnalysis() } }) {
-                        Image(systemName: showAnalysis ? "eye.fill" : "eye.slash").font(.system(size: 22)).foregroundColor(showAnalysis ? accentColor : .white)
+                    Button(action: {
+                        showAnalysis.toggle()
+                        if showAnalysis {
+                            triggerAnalysis()
+                        }
+                    }) {
+                        Image(systemName: showAnalysis ? "eye.fill" : "eye.slash")
+                            .font(.system(size: 22))
+                            .foregroundColor(showAnalysis ? accentColor : .white)
+                            .frame(width: 44, height: 44)
                     }
                 }
-                .padding(.horizontal, 24).padding(.top, 16).padding(.bottom, 20)
+                .frame(height: 44)
+                .padding(.horizontal, 24)
+                .padding(.top, 16)
+                .padding(.bottom, 12)
                 
                 // Player Profiles
                 HStack(alignment: .center) {
@@ -55,91 +74,69 @@ struct GameView: View {
                     let isBlackThinking = isThinking && currentTurn == .black
                     HStack(spacing: 12) {
                         ZStack {
+                            RotatingRingView(color: accentColor, lineWidth: 2.5)
+                                .frame(width: 50, height: 50)
+                                .opacity(isBlackThinking ? 1.0 : 0.0)
                             Circle().fill(Color.black).frame(width: 40, height: 40).shadow(color: .black.opacity(0.5), radius: 2)
                                 .overlay(Circle().stroke(currentTurn == .black ? accentColor : Color.clear, lineWidth: 2))
-                            if isBlackThinking {
-                                RotatingRingView(color: accentColor, lineWidth: 2.5)
-                                    .frame(width: 50, height: 50)
-                            }
                         }
+                        .frame(width: 52, height: 52)
+                        
                         VStack(alignment: .leading, spacing: 2) {
-                            HStack(spacing: 6) {
-                                Text(LocalizedStringKey(gameMode == .userWhite ? "KataGo" : (gameMode == .aiBoth ? "KataGo" : "You")))
-                                    .font(.system(size: 18, weight: .bold)).foregroundColor(.white)
-                                if isBlackThinking {
-                                    ThinkingDotsView(color: accentColor)
-                                }
-                            }
-                            if isBlackThinking {
-                                Text("Thinking...")
-                                    .font(.system(size: 13, weight: .bold))
-                                    .foregroundColor(accentColor)
-                            } else {
-                                Text("Captures: \(blackCaptures)").font(.system(size: 14)).foregroundColor(.gray)
-                            }
+                            Text(LocalizedStringKey(gameMode == .userWhite ? "KataGo" : (gameMode == .aiBoth ? "KataGo" : "Myself")))
+                                .font(.system(size: 18, weight: .bold)).foregroundColor(.white)
+                            Text("Captures: \(blackCaptures)").font(.system(size: 14)).foregroundColor(.gray)
                         }
                     }
                     Spacer()
                     
-                    ZStack {
-                        if isThinking {
-                            RotatingRingView(color: accentColor, lineWidth: 2.0)
-                                .frame(width: 22, height: 22)
-                        } else {
-                            Text("VS").font(.system(size: 16, weight: .black)).foregroundColor(.gray.opacity(0.5))
-                        }
-                    }
-                    .frame(width: 36)
+                    Text("VS").font(.system(size: 16, weight: .black)).foregroundColor(.gray.opacity(0.5))
+                        .frame(width: 36)
                     
                     Spacer()
                     // Player 2 (White)
                     let isWhiteThinking = isThinking && currentTurn == .white
                     HStack(spacing: 12) {
                         VStack(alignment: .trailing, spacing: 2) {
-                            HStack(spacing: 6) {
-                                if isWhiteThinking {
-                                    ThinkingDotsView(color: accentColor)
-                                }
-                                Text(LocalizedStringKey(gameMode == .userBlack ? "KataGo" : (gameMode == .aiBoth ? "KataGo" : "You")))
-                                    .font(.system(size: 18, weight: .bold)).foregroundColor(.white)
-                            }
-                            if isWhiteThinking {
-                                Text("Thinking...")
-                                    .font(.system(size: 13, weight: .bold))
-                                    .foregroundColor(accentColor)
-                            } else {
-                                Text("Captures: \(whiteCaptures)").font(.system(size: 14)).foregroundColor(.gray)
-                            }
+                            Text(LocalizedStringKey(gameMode == .userBlack ? "KataGo" : (gameMode == .aiBoth ? "KataGo" : "Myself")))
+                                .font(.system(size: 18, weight: .bold)).foregroundColor(.white)
+                            Text("Captures: \(whiteCaptures)").font(.system(size: 14)).foregroundColor(.gray)
                         }
                         ZStack {
+                            RotatingRingView(color: accentColor, lineWidth: 2.5)
+                                .frame(width: 50, height: 50)
+                                .opacity(isWhiteThinking ? 1.0 : 0.0)
                             Circle().fill(Color.white).frame(width: 40, height: 40).shadow(color: .black.opacity(0.3), radius: 2)
                                 .overlay(Circle().stroke(currentTurn == .white ? accentColor : Color.clear, lineWidth: 2))
-                            if isWhiteThinking {
-                                RotatingRingView(color: accentColor, lineWidth: 2.5)
-                                    .frame(width: 50, height: 50)
-                            }
                         }
+                        .frame(width: 52, height: 52)
                     }
                 }
-                .padding(.horizontal, 20).padding(.bottom, 12)
+                .frame(height: 52)
+                .padding(.horizontal, 20)
+                .padding(.bottom, 8)
                 
                 // AI Status Row
-                if showAnalysis && finalScore == nil {
-                    HStack(spacing: 20) {
-                        HStack(spacing: 8) {
-                            Text("Black Winrate").font(.system(size: 12, weight: .bold)).foregroundColor(.gray)
-                            Text("\(Int(analysis.winrate * 100))%").font(.system(size: 16, weight: .heavy)).foregroundColor(accentColor)
-                        }
-                        Rectangle().fill(Color.gray.opacity(0.3)).frame(width: 1, height: 20)
-                        HStack(spacing: 8) {
-                            Text("Score Lead").font(.system(size: 12, weight: .bold)).foregroundColor(.gray)
-                            Text("\(analysis.scoreLead >= 0 ? "B" : "W")+\(String(format: "%.1f", abs(analysis.scoreLead)))").font(.system(size: 16, weight: .heavy)).foregroundColor(accentColor)
-                        }
+                HStack(spacing: 20) {
+                    HStack(spacing: 8) {
+                        Text(LocalizedStringKey("Black Winrate")).font(.system(size: 12, weight: .bold)).foregroundColor(.gray)
+                        Text("\(Int(analysis.winrate * 100))%").font(.system(size: 16, weight: .heavy)).foregroundColor(accentColor)
                     }
-                    .padding(.vertical, 8).padding(.horizontal, 16).background(Color.white.opacity(0.08)).cornerRadius(12).padding(.bottom, 8)
+                    Rectangle().fill(Color.gray.opacity(0.3)).frame(width: 1, height: 20)
+                    HStack(spacing: 8) {
+                        Text(LocalizedStringKey("Score Lead")).font(.system(size: 12, weight: .bold)).foregroundColor(.gray)
+                        Text("\(analysis.scoreLead >= 0 ? "B" : "W")+\(String(format: "%.1f", abs(analysis.scoreLead)))").font(.system(size: 16, weight: .heavy)).foregroundColor(accentColor)
+                    }
                 }
+                .frame(height: 36)
+                .padding(.horizontal, 16)
+                .background(Color.white.opacity(0.08))
+                .cornerRadius(12)
+                .opacity(showAnalysis && finalScore == nil ? 1.0 : 0.0)
+                .frame(height: 36)
+                .padding(.bottom, 8)
 
-                Spacer().frame(height: 12)
+                Color.clear.frame(height: 8)
 
                 // Only render the board once the engine is ready
                 if isEngineInitialized {
@@ -226,6 +223,7 @@ struct GameView: View {
                 }
                 .padding(.horizontal, 20).padding(.bottom, 30)
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             
             if showPassAlert {
                 VStack {
@@ -311,7 +309,7 @@ struct GameView: View {
     }
 
     private func executeMove(x: Int, y: Int) {
-        guard let engine = bridge, !isThinking, finalScore == nil else { return }
+        guard let engine = bridge, !isThinking, !isAnalyzing, finalScore == nil else { return }
         let turnColor = currentTurn
         let turnVal = turnColor.rawValue
         let coord = toGtpCoord(x: x, y: y)
@@ -336,6 +334,7 @@ struct GameView: View {
                 PersistedMove.saveAll(self.moveHistory)
                 
                 self.syncBoardFromEngine()
+                SoundManager.shared.playStoneSound(withHaptic: true)
                 self.isThinking = false
                 
                 self.checkAiTurn()
@@ -344,7 +343,7 @@ struct GameView: View {
     }
 
     private func handlePass() {
-        guard let engine = bridge, !isThinking, finalScore == nil else { return }
+        guard let engine = bridge, !isThinking, !isAnalyzing, finalScore == nil else { return }
         let turnColor = currentTurn
         let turnVal = turnColor.rawValue
         
@@ -394,12 +393,18 @@ struct GameView: View {
             let res = engine.sendGtpCommand("genmove \(aiColor == .black ? "black" : "white")")
             
             var rootInfo: [String: Any]? = nil
+            var parsedOwnership: [Double]? = nil
             if self.showAnalysis {
                 if let anaRes = engine.sendGtpCommand("kata-get-analysis black"), anaRes.hasPrefix("=") {
-                    let jsonStr = anaRes.replacingOccurrences(of: "=", with: "").trimmingCharacters(in: .whitespacesAndNewlines)
+                    let jsonStr = anaRes.replacingOccurrences(of: "= ", with: "").replacingOccurrences(of: "=", with: "").trimmingCharacters(in: .whitespacesAndNewlines)
                     if let data = jsonStr.data(using: .utf8),
                        let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
                         rootInfo = json["rootInfo"] as? [String: Any]
+                        if let raw = json["ownership"] as? [NSNumber] {
+                            parsedOwnership = raw.map { $0.doubleValue }
+                        } else if let raw = json["ownership"] as? [Double] {
+                            parsedOwnership = raw
+                        }
                     }
                 }
             }
@@ -410,6 +415,9 @@ struct GameView: View {
                 if let info = rootInfo {
                     self.analysis.winrate = info["winrate"] as? Double ?? 0.5
                     self.analysis.scoreLead = info["scoreLead"] as? Double ?? 0.0
+                }
+                if let owner = parsedOwnership {
+                    self.analysis.ownership = owner
                 }
                 
                 guard let response = res, response.hasPrefix("=") else { return }
@@ -429,6 +437,8 @@ struct GameView: View {
                     
                     if self.consecutivePasses >= 2 {
                         self.finishGame()
+                    } else if self.showAnalysis && self.finalScore == nil {
+                        self.triggerAnalysis()
                     }
                 } else if let pos = self.fromGtpCoord(moveStr) {
                     let move = PersistedMove(x: pos.0, y: pos.1, isPass: false, stone: aiColor.rawValue)
@@ -439,6 +449,10 @@ struct GameView: View {
                     self.consecutivePasses = 0
                     PersistedMove.saveAll(self.moveHistory)
                     self.syncBoardFromEngine()
+                    SoundManager.shared.playStoneSound(withHaptic: false)
+                    if self.showAnalysis && self.finalScore == nil {
+                        self.triggerAnalysis()
+                    }
                 }
                 
                 if self.gameMode == .aiBoth && self.finalScore == nil {
@@ -471,17 +485,29 @@ struct GameView: View {
             let p = turnColor == .black ? "black" : "white"
             _ = engine.sendGtpCommand("think \(p) \(analysisVisits)")
             let res = engine.sendGtpCommand("kata-get-analysis black")
-            DispatchQueue.main.async {
-                self.isAnalyzing = false
-                if let response = res, response.hasPrefix("=") {
-                    let jsonStr = response.replacingOccurrences(of: "=", with: "").trimmingCharacters(in: .whitespacesAndNewlines)
-                    if let data = jsonStr.data(using: .utf8),
-                       let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-                       let rootInfo = json["rootInfo"] as? [String: Any] {
-                        self.analysis.winrate = rootInfo["winrate"] as? Double ?? 0.5
-                        self.analysis.scoreLead = rootInfo["scoreLead"] as? Double ?? 0.0
+            var newWinrate: Double? = nil
+            var newScoreLead: Double? = nil
+            var newOwnership: [Double]? = nil
+            if let response = res, response.hasPrefix("=") {
+                let jsonStr = response.replacingOccurrences(of: "= ", with: "").replacingOccurrences(of: "=", with: "").trimmingCharacters(in: .whitespacesAndNewlines)
+                if let data = jsonStr.data(using: .utf8),
+                   let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+                    if let rootInfo = json["rootInfo"] as? [String: Any] {
+                        newWinrate = rootInfo["winrate"] as? Double
+                        newScoreLead = rootInfo["scoreLead"] as? Double
+                    }
+                    if let raw = json["ownership"] as? [NSNumber] {
+                        newOwnership = raw.map { $0.doubleValue }
+                    } else if let raw = json["ownership"] as? [Double] {
+                        newOwnership = raw
                     }
                 }
+            }
+            DispatchQueue.main.async {
+                self.isAnalyzing = false
+                if let wr = newWinrate { self.analysis.winrate = wr }
+                if let sl = newScoreLead { self.analysis.scoreLead = sl }
+                if let owner = newOwnership { self.analysis.ownership = owner }
             }
         }
     }
@@ -490,8 +516,24 @@ struct GameView: View {
         isThinking = true
         DispatchQueue.global(qos: .userInitiated).async {
             let res = bridge?.sendGtpCommand("final_score")
+            let anaRes = bridge?.sendGtpCommand("kata-get-analysis black")
+            var parsedOwnership: [Double]? = nil
+            if let ana = anaRes, ana.hasPrefix("=") {
+                let jsonStr = ana.replacingOccurrences(of: "= ", with: "").replacingOccurrences(of: "=", with: "").trimmingCharacters(in: .whitespacesAndNewlines)
+                if let data = jsonStr.data(using: .utf8),
+                   let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+                    if let raw = json["ownership"] as? [NSNumber] {
+                        parsedOwnership = raw.map { $0.doubleValue }
+                    } else if let raw = json["ownership"] as? [Double] {
+                        parsedOwnership = raw
+                    }
+                }
+            }
             DispatchQueue.main.async {
-                isThinking = false
+                self.isThinking = false
+                if let owner = parsedOwnership {
+                    self.analysis.ownership = owner
+                }
                 finalScore = res?.replacingOccurrences(of: "= ", with: "") ?? "Game Ended"
                 showGameOverDialog = true
             }
@@ -644,6 +686,9 @@ struct GameView: View {
             currentTurn = (next.stone == 1 ? .white : .black)
             PersistedMove.saveAll(moveHistory)
             syncBoardFromEngine()
+            if !next.isPass {
+                SoundManager.shared.playStoneSound(withHaptic: true)
+            }
             
             if showAnalysis { triggerAnalysis() }
         }
@@ -672,6 +717,7 @@ struct SettingsView: View {
     @Environment(\.presentationMode) var presentationMode
     
     @ObservedObject private var storeManager = StoreManager.shared
+    @ObservedObject private var soundManager = SoundManager.shared
     
     private let levels: [(String, Int)] = [("Easy", 100), ("Amateur", 500), ("Advanced", 1000), ("Pro", 2500)]
     
@@ -734,15 +780,21 @@ struct SettingsView: View {
                     }
                     
                     Section(header: Text("Play As")) {
-                        Picker("Mode", selection: $settings.mode) {
+                        Picker("", selection: $settings.mode) {
                             ForEach(GameMode.allCases, id: \.self) { (mode: GameMode) in
                                 Text(LocalizedStringKey(mode.rawValue)).tag(mode)
                             }
-                        }.pickerStyle(.inline)
+                        }
+                        .pickerStyle(.inline)
+                        .labelsHidden()
                     }
                     
                     Section(header: Text("Handicap")) {
                         Stepper("\(settings.handicap) Stones", value: $settings.handicap, in: 0...9)
+                    }
+                    
+                    Section(header: Text(LocalizedStringKey("Sound"))) {
+                        Toggle(LocalizedStringKey("Stone Sound"), isOn: $soundManager.isSoundEnabled)
                     }
                 }
                 
@@ -858,7 +910,7 @@ struct ActionButton: View {
 struct RotatingRingView: View {
     var color: Color = Color(red: 100/255, green: 200/255, blue: 255/255)
     var lineWidth: CGFloat = 2.5
-    @State private var isRotating = 0.0
+    @State private var isRotating = false
     
     var body: some View {
         Circle()
@@ -870,33 +922,13 @@ struct RotatingRingView: View {
                 ),
                 style: StrokeStyle(lineWidth: lineWidth, lineCap: .round)
             )
-            .rotationEffect(Angle(degrees: isRotating))
+            .rotationEffect(Angle(degrees: isRotating ? 360 : 0))
+            .animation(
+                Animation.linear(duration: 0.85).repeatForever(autoreverses: false),
+                value: isRotating
+            )
             .onAppear {
-                withAnimation(Animation.linear(duration: 0.85).repeatForever(autoreverses: false)) {
-                    isRotating = 360.0
-                }
+                isRotating = true
             }
-    }
-}
-
-struct ThinkingDotsView: View {
-    var color: Color = Color(red: 100/255, green: 200/255, blue: 255/255)
-    @State private var phase = 0
-    
-    var body: some View {
-        HStack(spacing: 3) {
-            ForEach(0..<3) { index in
-                Circle()
-                    .fill(color)
-                    .frame(width: 4.5, height: 4.5)
-                    .scaleEffect(phase == index ? 1.35 : 0.75)
-                    .opacity(phase == index ? 1.0 : 0.35)
-            }
-        }
-        .onAppear {
-            Timer.scheduledTimer(withTimeInterval: 0.3, repeats: true) { _ in
-                phase = (phase + 1) % 3
-            }
-        }
     }
 }

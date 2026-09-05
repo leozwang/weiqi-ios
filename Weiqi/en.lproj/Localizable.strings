@@ -27,7 +27,8 @@
 "You're white" = "I'm White";
 "Two Players" = "Two Players";
 "AI vs AI" = "AI vs AI";
-"You" = "You";
+"Myself" = "Myself";
+"You" = "Myself";
 "Captures: 0" = "Captures: 0";
 "%d visits per move" = "%d visits per move";
 "Unlock Elite Levels" = "Unlock Elite Levels";
@@ -39,4 +40,6 @@
 "Black" = "Black";
 "White" = "White";
 "AI (%@) Passed" = "AI (%@) Passed";
+"Sound" = "Sound";
+"Stone Sound" = "Stone Sound";
 

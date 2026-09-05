@@ -27,7 +27,8 @@
 "You're white" = "自分が白番";
 "Two Players" = "二人対局";
 "AI vs AI" = "AI 対局";
-"You" = "あなた";
+"Myself" = "自分";
+"You" = "自分";
 "Captures: 0" = "アゲハマ: 0";
 "%d visits per move" = "1手あたり %d 手読む";
 "Unlock Elite Levels" = "エリートレベルをアンロック";
@@ -39,4 +40,6 @@
 "Black" = "黒";
 "White" = "白";
 "AI (%@) Passed" = "AI（%@）がパスしました";
+"Sound" = "サウンド";
+"Stone Sound" = "着手音";
 

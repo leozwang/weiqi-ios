@@ -16,7 +16,7 @@ struct BoardView: View {
 
     var body: some View {
         GeometryReader { geometry in
-            let side = geometry.size.width
+            let side = min(geometry.size.width, geometry.size.height)
             let margin = side * marginRatio
             let gridSize = side - 2 * margin
             let step = gridSize / CGFloat(boardSize - 1)
@@ -35,28 +35,21 @@ struct BoardView: View {
                 // 3. Hoshi Points (Individual views)
                 HoshiOverlay(boardSize: boardSize, margin: margin)
                 
-                // 4. Ownership Analysis Dots
-                if (showAnalysis || isGameOver) && !analysis.ownership.isEmpty {
-                    ForEach(0..<boardSize, id: \.self) { y in
-                        ForEach(0..<boardSize, id: \.self) { x in
-                            let score = analysis.ownership[y * boardSize + x]
-                            if abs(score) > 0.1 {
-                                Circle()
-                                    .fill(score > 0 ? Color.black : Color.white)
-                                    .opacity(abs(score) * 0.4)
-                                    .frame(width: 6, height: 6)
-                                    .position(x: margin + CGFloat(x) * step, y: margin + CGFloat(y) * step)
-                            }
-                        }
-                    }
-                }
-
-                // 5. Stones
+                // 4. Stones Layer
                 ForEach(0..<boardSize, id: \.self) { y in
                     ForEach(0..<boardSize, id: \.self) { x in
                         let stone = boardState[y][x]
                         if stone != .empty {
+                            let isDead: Bool = {
+                                guard (showAnalysis || isGameOver) && analysis.ownership.count >= boardSize * boardSize else { return false }
+                                let score = analysis.ownership[y * boardSize + x]
+                                if stone == .white && score > 0.35 { return true }
+                                if stone == .black && score < -0.35 { return true }
+                                return false
+                            }()
+
                             StoneView(stone: stone, radius: stoneRadius)
+                                .opacity(isDead ? 0.45 : 1.0)
                                 .position(x: margin + CGFloat(x) * step, y: margin + CGFloat(y) * step)
                             
                             // Last Move Marker
@@ -65,6 +58,61 @@ struct BoardView: View {
                                     .stroke(stone == .black ? .white : .black, lineWidth: 1.5)
                                     .frame(width: 8, height: 8)
                                     .position(x: margin + CGFloat(x) * step, y: margin + CGFloat(y) * step)
+                            }
+                        }
+                    }
+                }
+
+                // 5. Potential Territory & Dead Stone Markers
+                if (showAnalysis || isGameOver) && analysis.ownership.count >= boardSize * boardSize {
+                    ForEach(0..<boardSize, id: \.self) { y in
+                        ForEach(0..<boardSize, id: \.self) { x in
+                            let score = analysis.ownership[y * boardSize + x]
+                            let stone = boardState[y][x]
+                            let absScore = abs(score)
+
+                            if stone == .empty && absScore >= 0.15 {
+                                let markerSize = step * (0.28 + 0.14 * CGFloat(min(1.0, absScore)))
+                                let isBlackTerritory = score > 0
+
+                                if isBlackTerritory {
+                                    RoundedRectangle(cornerRadius: 1.5)
+                                        .fill(Color.black.opacity(min(0.85, max(0.35, absScore * 0.85))))
+                                        .frame(width: markerSize, height: markerSize)
+                                        .position(x: margin + CGFloat(x) * step, y: margin + CGFloat(y) * step)
+                                } else {
+                                    RoundedRectangle(cornerRadius: 1.5)
+                                        .fill(Color.white.opacity(min(0.95, max(0.45, absScore * 0.95))))
+                                        .frame(width: markerSize, height: markerSize)
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 1.5)
+                                                .stroke(Color.black.opacity(0.4), lineWidth: 0.8)
+                                                .frame(width: markerSize, height: markerSize)
+                                        )
+                                        .position(x: margin + CGFloat(x) * step, y: margin + CGFloat(y) * step)
+                                }
+                            } else if stone != .empty {
+                                let isDeadWhite = (stone == .white && score > 0.35)
+                                let isDeadBlack = (stone == .black && score < -0.35)
+
+                                if isDeadWhite {
+                                    let markerSize = step * 0.34
+                                    RoundedRectangle(cornerRadius: 1.5)
+                                        .fill(Color.black.opacity(0.85))
+                                        .frame(width: markerSize, height: markerSize)
+                                        .position(x: margin + CGFloat(x) * step, y: margin + CGFloat(y) * step)
+                                } else if isDeadBlack {
+                                    let markerSize = step * 0.34
+                                    RoundedRectangle(cornerRadius: 1.5)
+                                        .fill(Color.white.opacity(0.95))
+                                        .frame(width: markerSize, height: markerSize)
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 1.5)
+                                                .stroke(Color.black.opacity(0.4), lineWidth: 0.8)
+                                                .frame(width: markerSize, height: markerSize)
+                                        )
+                                        .position(x: margin + CGFloat(x) * step, y: margin + CGFloat(y) * step)
+                                }
                             }
                         }
                     }
@@ -92,6 +140,7 @@ struct BoardView: View {
                     )
             }
             .frame(width: side, height: side)
+            .position(x: geometry.size.width / 2, y: geometry.size.height / 2)
         }
         .aspectRatio(1, contentMode: .fit)
         .padding(4)
