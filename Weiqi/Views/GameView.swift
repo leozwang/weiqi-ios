@@ -18,6 +18,8 @@ struct GameView: View {
     @State private var showGameOverDialog = false
     @State private var showSettings = false
     @State private var showNewGame = false
+    @State private var showSplashScreen = true
+    @State private var minSplashTimePassed = false
     
     @State private var moveHistory: [PersistedMove] = []
     @State private var redoStack: [PersistedMove] = []
@@ -184,7 +186,7 @@ struct GameView: View {
                             .progressViewStyle(CircularProgressViewStyle(tint: accentColor))
                             .scaleEffect(1.2)
                             .padding(.bottom, 4)
-                        Text("Initializing Engine...")
+                        Text(LocalizedStringKey("Initializing Engine..."))
                             .foregroundColor(.gray)
                             .font(.system(size: 14, weight: .medium))
                     }
@@ -249,15 +251,27 @@ struct GameView: View {
                 .transition(.move(edge: .top).combined(with: .opacity))
                 .zIndex(10)
             }
+            if showSplashScreen {
+                SplashScreenView()
+                    .transition(.opacity)
+                    .zIndex(100)
+            }
         }
         .preferredColorScheme(.dark)
         .onAppear {
             let saved = GameSettings.load()
             pendingSettings = saved
             currentVisits = saved.visits
-            // Sequential loading: wait a bit before starting engine
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                initializeEngine()
+            // Initialize engine immediately in background while splash screen is displayed
+            initializeEngine()
+            // Keep splash screen visible for a minimum of 1.4s for smooth visual transition
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.4) {
+                minSplashTimePassed = true
+                if isEngineInitialized || initError != nil {
+                    withAnimation(.easeInOut(duration: 0.5)) {
+                        showSplashScreen = false
+                    }
+                }
             }
         }
         .sheet(isPresented: $showSettings) {
@@ -590,10 +604,20 @@ struct GameView: View {
                     let savedSettings = GameSettings.load()
                     let savedMoves = PersistedMove.loadAll()
                     restoreGame(settings: savedSettings, moves: savedMoves)
+                    if self.minSplashTimePassed {
+                        withAnimation(.easeInOut(duration: 0.5)) {
+                            self.showSplashScreen = false
+                        }
+                    }
                 }
             } else {
                 DispatchQueue.main.async {
                     self.initError = "KataGo failed to initialize (Error Code: \(status))"
+                    if self.minSplashTimePassed {
+                        withAnimation(.easeInOut(duration: 0.5)) {
+                            self.showSplashScreen = false
+                        }
+                    }
                 }
             }
         }
@@ -1009,5 +1033,69 @@ struct RotatingRingView: View {
             .onAppear {
                 isRotating = true
             }
+    }
+}
+
+struct SplashScreenView: View {
+    @State private var isPulsing = false
+    private let backgroundColor = Color(red: 24/255, green: 24/255, blue: 28/255)
+    private let accentColor = Color(red: 100/255, green: 200/255, blue: 255/255)
+
+    var body: some View {
+        ZStack {
+            backgroundColor.ignoresSafeArea()
+
+            // Main Brand Block (seamless match with LaunchScreen storyboard positioning)
+            VStack(spacing: 20) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 28, style: .continuous)
+                        .fill(accentColor.opacity(0.18))
+                        .frame(width: 132, height: 132)
+                        .blur(radius: isPulsing ? 14 : 6)
+                        .scaleEffect(isPulsing ? 1.08 : 0.98)
+
+                    Image("LaunchIcon")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 120, height: 120)
+                        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+                        .shadow(color: .black.opacity(0.4), radius: 8, y: 4)
+                }
+                .frame(width: 120, height: 120)
+
+                VStack(spacing: 8) {
+                    Text("围棋 碁 GO!")
+                        .font(.system(size: 32, weight: .bold))
+                        .foregroundColor(.white)
+                        .tracking(1)
+
+                    Text(LocalizedStringKey("Powered by KataGo Metal"))
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundColor(.gray.opacity(0.85))
+                        .tracking(0.5)
+                }
+            }
+            .offset(y: -40)
+
+            // Bottom loading status
+            VStack {
+                Spacer()
+                VStack(spacing: 14) {
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle(tint: accentColor))
+                        .scaleEffect(1.1)
+
+                    Text(LocalizedStringKey("Initializing Neural Engine..."))
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundColor(.gray.opacity(0.85))
+                }
+                .padding(.bottom, 64)
+            }
+        }
+        .onAppear {
+            withAnimation(Animation.easeInOut(duration: 1.2).repeatForever(autoreverses: true)) {
+                isPulsing = true
+            }
+        }
     }
 }
