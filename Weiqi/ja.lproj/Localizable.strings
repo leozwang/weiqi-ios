@@ -42,4 +42,24 @@
 "AI (%@) Passed" = "AI（%@）がパスしました";
 "Sound" = "サウンド";
 "Stone Sound" = "着手音";
+"Settings" = "設定";
+"New Game" = "新規対局";
+"Restart Game" = "最初からやり直す";
+"Resign" = "投了";
+"Resign Game?" = "投了しますか？";
+"Are you sure you want to resign?" = "本当に投了しますか？";
+"Restart Game?" = "最初からやり直しますか？";
+"Restart" = "最初から";
+"Reset board and start this match from move 1?" = "盤面を初期化して第1手からやり直しますか？";
+"Sound & Haptics" = "サウンドと触覚";
+"About & Engine Info" = "情報とエンジン";
+"Action" = "アクション";
+"Haptic Feedback" = "触覚フィードバック";
+"Engine" = "エンジン";
+"Neural Network" = "ニューラルネットワーク";
+"Hardware Acceleration" = "ハードウェアアクセラレーション";
+"Rules" = "ルール";
+"Chinese Rules (7.5 Komi)" = "中国ルール (コミ7.5目)";
+"App Version" = "バージョン";
+"Done" = "完了";
 

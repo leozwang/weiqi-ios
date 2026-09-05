@@ -42,4 +42,24 @@
 "AI (%@) Passed" = "AI (%@) 选择停一手";
 "Sound" = "声音";
 "Stone Sound" = "落子音效";
+"Settings" = "设置";
+"New Game" = "新对局";
+"Restart Game" = "重新开始";
+"Resign" = "认输";
+"Resign Game?" = "确认认输？";
+"Are you sure you want to resign?" = "确定要认输吗？";
+"Restart Game?" = "重新开始本局？";
+"Restart" = "重新开始";
+"Reset board and start this match from move 1?" = "清空棋盘并从第一步重新对局？";
+"Sound & Haptics" = "声音与触感";
+"About & Engine Info" = "关于与引擎信息";
+"Action" = "操作";
+"Haptic Feedback" = "震动反馈";
+"Engine" = "引擎";
+"Neural Network" = "神经网络";
+"Hardware Acceleration" = "硬件加速";
+"Rules" = "规则";
+"Chinese Rules (7.5 Komi)" = "中国规则 (贴7.5目)";
+"App Version" = "版本";
+"Done" = "完成";
 

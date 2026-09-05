@@ -7,10 +7,17 @@ final class SoundManager: ObservableObject {
     static let shared = SoundManager()
     
     private let soundEnabledKey = "isSoundEnabled"
+    private let hapticEnabledKey = "isHapticEnabled"
     
     @Published var isSoundEnabled: Bool {
         didSet {
             UserDefaults.standard.set(isSoundEnabled, forKey: soundEnabledKey)
+        }
+    }
+    
+    @Published var isHapticEnabled: Bool {
+        didSet {
+            UserDefaults.standard.set(isHapticEnabled, forKey: hapticEnabledKey)
         }
     }
     
@@ -24,6 +31,12 @@ final class SoundManager: ObservableObject {
             self.isSoundEnabled = true
         } else {
             self.isSoundEnabled = UserDefaults.standard.bool(forKey: soundEnabledKey)
+        }
+        
+        if UserDefaults.standard.object(forKey: hapticEnabledKey) == nil {
+            self.isHapticEnabled = true
+        } else {
+            self.isHapticEnabled = UserDefaults.standard.bool(forKey: hapticEnabledKey)
         }
         
         setupAudioSession()
@@ -75,7 +88,7 @@ final class SoundManager: ObservableObject {
     
     /// Plays the authentic Go stone placement sound and optionally triggers subtle haptic feedback
     func playStoneSound(withHaptic: Bool = false) {
-        if withHaptic {
+        if withHaptic && isHapticEnabled {
             hapticGenerator.impactOccurred()
         }
         

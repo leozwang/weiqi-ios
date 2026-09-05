@@ -17,6 +17,7 @@ struct GameView: View {
     @State private var finalScore: String? = nil
     @State private var showGameOverDialog = false
     @State private var showSettings = false
+    @State private var showNewGame = false
     
     @State private var moveHistory: [PersistedMove] = []
     @State private var redoStack: [PersistedMove] = []
@@ -39,7 +40,7 @@ struct GameView: View {
             VStack(spacing: 0) {
                 // Top Navigation Bar
                 HStack {
-                    Button(action: {}) {
+                    Button(action: { showSettings = true }) {
                         Image(systemName: "line.3.horizontal")
                             .font(.system(size: 24))
                             .foregroundColor(.white)
@@ -208,7 +209,7 @@ struct GameView: View {
 
                 // Primary Action Bar (PLACE & NEW GAME)
                 HStack(spacing: 16) {
-                    Button(action: { showSettings = true }) {
+                    Button(action: { showNewGame = true }) {
                         HStack { Image(systemName: "plus.circle.fill"); Text("NEW GAME") }.font(.system(size: 14, weight: .bold)).foregroundColor(.white).frame(width: 130, height: 64)
                             .background(RoundedRectangle(cornerRadius: 32).fill(Color.orange)).shadow(color: Color.orange.opacity(0.3), radius: 6, y: 3)
                     }
@@ -260,7 +261,10 @@ struct GameView: View {
             }
         }
         .sheet(isPresented: $showSettings) {
-            SettingsView(settings: $pendingSettings, visits: $currentVisits) {
+            SettingsView()
+        }
+        .sheet(isPresented: $showNewGame) {
+            NewGameView(settings: $pendingSettings, visits: $currentVisits) {
                 pendingSettings.visits = currentVisits
                 pendingSettings.save()
                 startNewGame(settings: pendingSettings, visits: currentVisits)
@@ -272,7 +276,7 @@ struct GameView: View {
             }
         }
         .alert("Game Over", isPresented: $showGameOverDialog) {
-            Button("NEW GAME") { showSettings = true }
+            Button("NEW GAME") { showNewGame = true }
             Button("BACK TO BOARD", role: .cancel) { }
         } message: { Text("Result: \(finalScore ?? "Unknown")") }
     }
@@ -370,6 +374,27 @@ struct GameView: View {
                 }
             }
         }
+    }
+
+    private func handleResign() {
+        guard !isThinking, finalScore == nil else { return }
+        let winnerScore: String
+        if gameMode == .userBlack {
+            winnerScore = "W+R"
+        } else if gameMode == .userWhite {
+            winnerScore = "B+R"
+        } else {
+            winnerScore = (currentTurn == .black ? "W+R" : "B+R")
+        }
+        previewMove = nil
+        finalScore = winnerScore
+        showGameOverDialog = true
+    }
+
+    private func restartCurrentGame() {
+        previewMove = nil
+        let saved = GameSettings.load()
+        startNewGame(settings: saved, visits: saved.visits)
     }
 
     private func checkAiTurn() {
@@ -711,13 +736,71 @@ struct GameView: View {
 // --- Subviews ---
 
 struct SettingsView: View {
+    @Environment(\.presentationMode) var presentationMode
+    @ObservedObject private var soundManager = SoundManager.shared
+
+    private var appVersion: String {
+        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.11"
+        let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "12"
+        return "\(version) (\(build))"
+    }
+
+    var body: some View {
+        NavigationView {
+            Form {
+                // 1. Sound & Haptics
+                Section(header: Text(LocalizedStringKey("Sound & Haptics"))) {
+                    Toggle(LocalizedStringKey("Stone Sound"), isOn: $soundManager.isSoundEnabled)
+                    Toggle(LocalizedStringKey("Haptic Feedback"), isOn: $soundManager.isHapticEnabled)
+                }
+
+                // 2. About & Engine Info
+                Section(header: Text(LocalizedStringKey("About & Engine Info"))) {
+                    HStack {
+                        Text(LocalizedStringKey("Engine"))
+                        Spacer()
+                        Text("KataGo v1.15").foregroundColor(.secondary)
+                    }
+                    HStack {
+                        Text(LocalizedStringKey("Neural Network"))
+                        Spacer()
+                        Text("15-Block CNN").foregroundColor(.secondary)
+                    }
+                    HStack {
+                        Text(LocalizedStringKey("Hardware Acceleration"))
+                        Spacer()
+                        HStack(spacing: 4) {
+                            Image(systemName: "bolt.fill").foregroundColor(.yellow)
+                            Text("Apple Metal GPU").foregroundColor(.secondary)
+                        }
+                    }
+                    HStack {
+                        Text(LocalizedStringKey("Rules"))
+                        Spacer()
+                        Text(LocalizedStringKey("Chinese Rules (7.5 Komi)")).foregroundColor(.secondary)
+                    }
+                    HStack {
+                        Text(LocalizedStringKey("App Version"))
+                        Spacer()
+                        Text(appVersion).foregroundColor(.secondary)
+                    }
+                }
+            }
+            .navigationTitle(LocalizedStringKey("Settings"))
+            .navigationBarItems(trailing: Button(LocalizedStringKey("Done")) {
+                presentationMode.wrappedValue.dismiss()
+            })
+        }
+    }
+}
+
+struct NewGameView: View {
     @Binding var settings: GameSettings
     @Binding var visits: Int
     var onStart: () -> Void
     @Environment(\.presentationMode) var presentationMode
     
     @ObservedObject private var storeManager = StoreManager.shared
-    @ObservedObject private var soundManager = SoundManager.shared
     
     private let levels: [(String, Int)] = [("Easy", 100), ("Amateur", 500), ("Advanced", 1000), ("Pro", 2500)]
     
@@ -791,10 +874,6 @@ struct SettingsView: View {
                     
                     Section(header: Text("Handicap")) {
                         Stepper("\(settings.handicap) Stones", value: $settings.handicap, in: 0...9)
-                    }
-                    
-                    Section(header: Text(LocalizedStringKey("Sound"))) {
-                        Toggle(LocalizedStringKey("Stone Sound"), isOn: $soundManager.isSoundEnabled)
                     }
                 }
                 

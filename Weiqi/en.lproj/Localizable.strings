@@ -42,4 +42,24 @@
 "AI (%@) Passed" = "AI (%@) Passed";
 "Sound" = "Sound";
 "Stone Sound" = "Stone Sound";
+"Settings" = "Settings";
+"New Game" = "New Game";
+"Restart Game" = "Restart Game";
+"Resign" = "Resign";
+"Resign Game?" = "Resign Game?";
+"Are you sure you want to resign?" = "Are you sure you want to resign?";
+"Restart Game?" = "Restart Game?";
+"Restart" = "Restart";
+"Reset board and start this match from move 1?" = "Reset board and start this match from move 1?";
+"Sound & Haptics" = "Sound & Haptics";
+"About & Engine Info" = "About & Engine Info";
+"Action" = "Action";
+"Haptic Feedback" = "Haptic Feedback";
+"Engine" = "Engine";
+"Neural Network" = "Neural Network";
+"Hardware Acceleration" = "Hardware Acceleration";
+"Rules" = "Rules";
+"Chinese Rules (7.5 Komi)" = "Chinese Rules (7.5 Komi)";
+"App Version" = "App Version";
+"Done" = "Done";
 
