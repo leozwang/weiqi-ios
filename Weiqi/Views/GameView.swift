@@ -279,6 +279,7 @@ struct GameView: View {
         }
         .sheet(isPresented: $showNewGame) {
             NewGameView(settings: $pendingSettings, visits: $currentVisits) {
+                showNewGame = false
                 pendingSettings.visits = currentVisits
                 pendingSettings.save()
                 startNewGame(settings: pendingSettings, visits: currentVisits)
@@ -624,6 +625,7 @@ struct GameView: View {
     }
 
     private func startNewGame(settings: GameSettings, visits: Int) {
+        showNewGame = false
         showSettings = false
         let rawBoard = getFixedHandicapStones(count: settings.handicap)
         let initialMoves = rawBoard.map { PersistedMove(x: $0.0, y: $0.1, isPass: false, stone: 1) }
@@ -685,6 +687,7 @@ struct GameView: View {
                 self.moveHistory = history
                 self.redoStack = []
                 self.gameMode = settings.mode
+                self.currentVisits = settings.visits
                 self.currentTurn = nextTurn
                 self.syncBoardFromEngine()
                 self.isThinking = false
@@ -973,8 +976,11 @@ struct NewGameView: View {
                             }
                         }
                     } else {
-                        Button(action: onStart) {
-                            Text("START GAME")
+                        Button(action: {
+                            presentationMode.wrappedValue.dismiss()
+                            onStart()
+                        }) {
+                            Text(LocalizedStringKey("START GAME"))
                                 .font(.system(size: 16, weight: .black))
                                 .foregroundColor(.white)
                                 .frame(maxWidth: .infinity)
@@ -987,8 +993,8 @@ struct NewGameView: View {
                 .padding([.horizontal, .bottom])
                 .background(Color(UIColor.systemGroupedBackground))
             }
-            .navigationTitle("New Game")
-            .navigationBarItems(trailing: Button("Cancel") { presentationMode.wrappedValue.dismiss() })
+            .navigationTitle(LocalizedStringKey("New Game"))
+            .navigationBarItems(trailing: Button(LocalizedStringKey("Cancel")) { presentationMode.wrappedValue.dismiss() })
         }
     }
 }
