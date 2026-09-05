@@ -18,8 +18,13 @@
 "Amateur" = "业余";
 "Advanced" = "专业";
 "Pro" = "职业";
-"You are Black" = "执黑先行";
-"You are White" = "执白后行";
+"I'm Black" = "我执黑";
+"I'm White" = "我执白";
+"You are Black" = "我执黑";
+"You are White" = "我执白";
+"You're Black" = "我执黑";
+"You're White" = "我执白";
+"You're white" = "我执白";
 "Two Players" = "双人对弈";
 "AI vs AI" = "电脑自弈";
 "You" = "您";

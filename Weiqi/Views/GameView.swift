@@ -10,6 +10,7 @@ struct GameView: View {
     @State private var currentTurn: Stone = .black
     @State private var analysis = AnalysisResult()
     @State private var isThinking = false
+    @State private var isAnalyzing = false
     @State private var showAnalysis = false
     @State private var isEngineInitialized = false
     @State private var initError: String? = nil
@@ -25,6 +26,8 @@ struct GameView: View {
     @State private var currentVisits: Int = 500
     @State private var showPassAlert = false
     @State private var passAlertMessage = ""
+    @State private var blackCaptures: Int = 0
+    @State private var whiteCaptures: Int = 0
 
     private let backgroundColor = Color(red: 24/255, green: 24/255, blue: 28/255)
     private let accentColor = Color(red: 100/255, green: 200/255, blue: 255/255)
@@ -47,42 +50,78 @@ struct GameView: View {
                 .padding(.horizontal, 24).padding(.top, 16).padding(.bottom, 20)
                 
                 // Player Profiles
-                HStack {
+                HStack(alignment: .center) {
                     // Player 1 (Black)
+                    let isBlackThinking = isThinking && currentTurn == .black
                     HStack(spacing: 12) {
-                        Circle().fill(Color.black).frame(width: 40, height: 40).shadow(color: .black.opacity(0.5), radius: 2)
-                            .overlay(Circle().stroke(currentTurn == .black ? accentColor : Color.clear, lineWidth: 2))
+                        ZStack {
+                            Circle().fill(Color.black).frame(width: 40, height: 40).shadow(color: .black.opacity(0.5), radius: 2)
+                                .overlay(Circle().stroke(currentTurn == .black ? accentColor : Color.clear, lineWidth: 2))
+                            if isBlackThinking {
+                                RotatingRingView(color: accentColor, lineWidth: 2.5)
+                                    .frame(width: 50, height: 50)
+                            }
+                        }
                         VStack(alignment: .leading, spacing: 2) {
-                            Text(LocalizedStringKey(gameMode == .userWhite ? "KataGo" : (gameMode == .aiBoth ? "KataGo" : "You")))
-                                .font(.system(size: 18, weight: .bold)).foregroundColor(.white)
-                            Text(LocalizedStringKey("Captures: 0")).font(.system(size: 14)).foregroundColor(.gray)
+                            HStack(spacing: 6) {
+                                Text(LocalizedStringKey(gameMode == .userWhite ? "KataGo" : (gameMode == .aiBoth ? "KataGo" : "You")))
+                                    .font(.system(size: 18, weight: .bold)).foregroundColor(.white)
+                                if isBlackThinking {
+                                    ThinkingDotsView(color: accentColor)
+                                }
+                            }
+                            if isBlackThinking {
+                                Text("Thinking...")
+                                    .font(.system(size: 13, weight: .bold))
+                                    .foregroundColor(accentColor)
+                            } else {
+                                Text("Captures: \(blackCaptures)").font(.system(size: 14)).foregroundColor(.gray)
+                            }
                         }
                     }
                     Spacer()
                     
                     ZStack {
-                        Text("VS").font(.system(size: 16, weight: .black)).foregroundColor(.gray.opacity(0.5))
-                            .opacity(isThinking ? 0 : 1)
-                        
                         if isThinking {
-                            RotatingRingView(color: accentColor)
+                            RotatingRingView(color: accentColor, lineWidth: 2.0)
+                                .frame(width: 22, height: 22)
+                        } else {
+                            Text("VS").font(.system(size: 16, weight: .black)).foregroundColor(.gray.opacity(0.5))
                         }
                     }
-                    .frame(width: 40)
+                    .frame(width: 36)
                     
                     Spacer()
                     // Player 2 (White)
+                    let isWhiteThinking = isThinking && currentTurn == .white
                     HStack(spacing: 12) {
                         VStack(alignment: .trailing, spacing: 2) {
-                            Text(LocalizedStringKey(gameMode == .userBlack ? "KataGo" : (gameMode == .aiBoth ? "KataGo" : "You")))
-                                .font(.system(size: 18, weight: .bold)).foregroundColor(.white)
-                            Text(LocalizedStringKey("Captures: 0")).font(.system(size: 14)).foregroundColor(.gray)
+                            HStack(spacing: 6) {
+                                if isWhiteThinking {
+                                    ThinkingDotsView(color: accentColor)
+                                }
+                                Text(LocalizedStringKey(gameMode == .userBlack ? "KataGo" : (gameMode == .aiBoth ? "KataGo" : "You")))
+                                    .font(.system(size: 18, weight: .bold)).foregroundColor(.white)
+                            }
+                            if isWhiteThinking {
+                                Text("Thinking...")
+                                    .font(.system(size: 13, weight: .bold))
+                                    .foregroundColor(accentColor)
+                            } else {
+                                Text("Captures: \(whiteCaptures)").font(.system(size: 14)).foregroundColor(.gray)
+                            }
                         }
-                        Circle().fill(Color.white).frame(width: 40, height: 40).shadow(color: .black.opacity(0.3), radius: 2)
-                            .overlay(Circle().stroke(currentTurn == .white ? accentColor : Color.clear, lineWidth: 2))
+                        ZStack {
+                            Circle().fill(Color.white).frame(width: 40, height: 40).shadow(color: .black.opacity(0.3), radius: 2)
+                                .overlay(Circle().stroke(currentTurn == .white ? accentColor : Color.clear, lineWidth: 2))
+                            if isWhiteThinking {
+                                RotatingRingView(color: accentColor, lineWidth: 2.5)
+                                    .frame(width: 50, height: 50)
+                            }
+                        }
                     }
                 }
-                .padding(.horizontal, 24).padding(.bottom, 12)
+                .padding(.horizontal, 20).padding(.bottom, 12)
                 
                 // AI Status Row
                 if showAnalysis && finalScore == nil {
@@ -247,82 +286,165 @@ struct GameView: View {
         previewMove = (x, y)
     }
 
-    private func executeMove(x: Int, y: Int) {
+    private func syncBoardFromEngine() {
         guard let engine = bridge else { return }
-        let turnVal = currentTurn.rawValue
-        if engine.sendGtpCommand("play \(currentTurn == .black ? "black" : "white") \(toGtpCoord(x: x, y: y))")?.hasPrefix("=") == true {
-            let move = PersistedMove(x: x, y: y, isPass: false, stone: turnVal)
-            moveHistory.append(move)
-            redoStack.removeAll()
-            boardState[y][x] = currentTurn
-            lastMove = (x, y)
-            previewMove = nil
-            currentTurn = (currentTurn == .black ? .white : .black)
-            consecutivePasses = 0
-            
-            PersistedMove.saveAll(moveHistory)
-            
-            if showAnalysis { triggerAnalysis() }
-            checkAiTurn()
+        if let res = engine.sendGtpCommand("get_board"), res.hasPrefix("=") {
+            let content = res.replacingOccurrences(of: "= ", with: "").trimmingCharacters(in: .whitespacesAndNewlines)
+            let tokens = content.components(separatedBy: " ")
+            if let gridStr = tokens.first, gridStr.count >= 361 {
+                var newBoard = Array(repeating: Array(repeating: Stone.empty, count: 19), count: 19)
+                let chars = Array(gridStr)
+                for y in 0..<19 {
+                    for x in 0..<19 {
+                        let c = chars[y * 19 + x]
+                        if c == "1" { newBoard[y][x] = .black }
+                        else if c == "2" { newBoard[y][x] = .white }
+                    }
+                }
+                self.boardState = newBoard
+            }
+            if tokens.count >= 3 {
+                self.blackCaptures = Int(tokens[1]) ?? 0
+                self.whiteCaptures = Int(tokens[2]) ?? 0
+            }
+        }
+    }
+
+    private func executeMove(x: Int, y: Int) {
+        guard let engine = bridge, !isThinking, finalScore == nil else { return }
+        let turnColor = currentTurn
+        let turnVal = turnColor.rawValue
+        let coord = toGtpCoord(x: x, y: y)
+        
+        previewMove = nil
+        isThinking = true
+        
+        DispatchQueue.global(qos: .userInitiated).async {
+            let res = engine.sendGtpCommand("play \(turnColor == .black ? "black" : "white") \(coord)")
+            DispatchQueue.main.async {
+                guard let response = res, response.hasPrefix("=") else {
+                    self.isThinking = false
+                    return
+                }
+                
+                let move = PersistedMove(x: x, y: y, isPass: false, stone: turnVal)
+                self.moveHistory.append(move)
+                self.redoStack.removeAll()
+                self.lastMove = (x, y)
+                self.currentTurn = (turnColor == .black ? .white : .black)
+                self.consecutivePasses = 0
+                PersistedMove.saveAll(self.moveHistory)
+                
+                self.syncBoardFromEngine()
+                self.isThinking = false
+                
+                self.checkAiTurn()
+            }
         }
     }
 
     private func handlePass() {
         guard let engine = bridge, !isThinking, finalScore == nil else { return }
-        let turnVal = currentTurn.rawValue
-        if engine.sendGtpCommand("play \(currentTurn == .black ? "black" : "white") pass")?.hasPrefix("=") == true {
-            let move = PersistedMove(x: -1, y: -1, isPass: true, stone: turnVal)
-            moveHistory.append(move)
-            previewMove = nil
-            currentTurn = (currentTurn == .black ? .white : .black)
-            consecutivePasses += 1
-            
-            PersistedMove.saveAll(moveHistory)
-            
-            if consecutivePasses >= 2 { finishGame() } else { if showAnalysis { triggerAnalysis() }; checkAiTurn() }
+        let turnColor = currentTurn
+        let turnVal = turnColor.rawValue
+        
+        isThinking = true
+        previewMove = nil
+        
+        DispatchQueue.global(qos: .userInitiated).async {
+            let res = engine.sendGtpCommand("play \(turnColor == .black ? "black" : "white") pass")
+            DispatchQueue.main.async {
+                self.isThinking = false
+                guard let response = res, response.hasPrefix("=") else { return }
+                
+                let move = PersistedMove(x: -1, y: -1, isPass: true, stone: turnVal)
+                self.moveHistory.append(move)
+                self.currentTurn = (turnColor == .black ? .white : .black)
+                self.consecutivePasses += 1
+                PersistedMove.saveAll(self.moveHistory)
+                self.syncBoardFromEngine()
+                
+                if self.consecutivePasses >= 2 {
+                    self.finishGame()
+                } else {
+                    self.checkAiTurn()
+                }
+            }
         }
     }
 
     private func checkAiTurn() {
         guard isEngineInitialized, !isThinking, finalScore == nil else { return }
-        if (gameMode == .aiBoth) || (gameMode == .userBlack && currentTurn == .white) || (gameMode == .userWhite && currentTurn == .black) { triggerAiMove() }
+        let isAiTurn = (gameMode == .aiBoth) ||
+                       (gameMode == .userBlack && currentTurn == .white) ||
+                       (gameMode == .userWhite && currentTurn == .black)
+        if isAiTurn {
+            triggerAiMove()
+        } else if showAnalysis {
+            triggerAnalysis()
+        }
     }
 
     private func triggerAiMove() {
-        guard let engine = bridge else { return }
+        guard let engine = bridge, !isThinking, finalScore == nil else { return }
+        let aiColor = currentTurn
         isThinking = true
+        
         DispatchQueue.global(qos: .userInitiated).async {
-            let res = engine.sendGtpCommand("genmove \(currentTurn == .black ? "black" : "white")")
-            DispatchQueue.main.async {
-                isThinking = false
-                if let response = res, response.hasPrefix("=") {
-                    let moveStr = response.replacingOccurrences(of: "= ", with: "").trimmingCharacters(in: .whitespacesAndNewlines)
-                    if moveStr.uppercased() == "PASS" {
-                        let aiColor = currentTurn == .black ? NSLocalizedString("Black", comment: "") : NSLocalizedString("White", comment: "")
-                        let format = NSLocalizedString("AI (%@) Passed", comment: "")
-                        showPassReminder(message: String(format: format, aiColor))
-                        
-                        let turnVal = currentTurn.rawValue
-                        let move = PersistedMove(x: -1, y: -1, isPass: true, stone: turnVal)
-                        moveHistory.append(move)
-                        
-                        currentTurn = (currentTurn == .black ? .white : .black); consecutivePasses += 1
-                        
-                        PersistedMove.saveAll(moveHistory)
-                        
-                        if consecutivePasses >= 2 { finishGame() }
-                    } else if let pos = fromGtpCoord(moveStr) {
-                        let turnVal = currentTurn.rawValue
-                        let move = PersistedMove(x: pos.0, y: pos.1, isPass: false, stone: turnVal)
-                        moveHistory.append(move)
-                        redoStack.removeAll()
-                        boardState[pos.1][pos.0] = currentTurn
-                        lastMove = pos; currentTurn = (currentTurn == .black ? .white : .black); consecutivePasses = 0
-                        
-                        PersistedMove.saveAll(moveHistory)
+            let res = engine.sendGtpCommand("genmove \(aiColor == .black ? "black" : "white")")
+            
+            var rootInfo: [String: Any]? = nil
+            if self.showAnalysis {
+                if let anaRes = engine.sendGtpCommand("kata-get-analysis black"), anaRes.hasPrefix("=") {
+                    let jsonStr = anaRes.replacingOccurrences(of: "=", with: "").trimmingCharacters(in: .whitespacesAndNewlines)
+                    if let data = jsonStr.data(using: .utf8),
+                       let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+                        rootInfo = json["rootInfo"] as? [String: Any]
                     }
-                    if showAnalysis { triggerAnalysis() }
-                    if gameMode == .aiBoth && finalScore == nil { DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { checkAiTurn() } }
+                }
+            }
+            
+            DispatchQueue.main.async {
+                self.isThinking = false
+                
+                if let info = rootInfo {
+                    self.analysis.winrate = info["winrate"] as? Double ?? 0.5
+                    self.analysis.scoreLead = info["scoreLead"] as? Double ?? 0.0
+                }
+                
+                guard let response = res, response.hasPrefix("=") else { return }
+                let moveStr = response.replacingOccurrences(of: "= ", with: "").trimmingCharacters(in: .whitespacesAndNewlines)
+                
+                if moveStr.uppercased() == "PASS" {
+                    let aiColorName = aiColor == .black ? NSLocalizedString("Black", comment: "") : NSLocalizedString("White", comment: "")
+                    let format = NSLocalizedString("AI (%@) Passed", comment: "")
+                    self.showPassReminder(message: String(format: format, aiColorName))
+                    
+                    let move = PersistedMove(x: -1, y: -1, isPass: true, stone: aiColor.rawValue)
+                    self.moveHistory.append(move)
+                    self.currentTurn = (aiColor == .black ? .white : .black)
+                    self.consecutivePasses += 1
+                    PersistedMove.saveAll(self.moveHistory)
+                    self.syncBoardFromEngine()
+                    
+                    if self.consecutivePasses >= 2 {
+                        self.finishGame()
+                    }
+                } else if let pos = self.fromGtpCoord(moveStr) {
+                    let move = PersistedMove(x: pos.0, y: pos.1, isPass: false, stone: aiColor.rawValue)
+                    self.moveHistory.append(move)
+                    self.redoStack.removeAll()
+                    self.lastMove = pos
+                    self.currentTurn = (aiColor == .black ? .white : .black)
+                    self.consecutivePasses = 0
+                    PersistedMove.saveAll(self.moveHistory)
+                    self.syncBoardFromEngine()
+                }
+                
+                if self.gameMode == .aiBoth && self.finalScore == nil {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        self.checkAiTurn()
+                    }
                 }
             }
         }
@@ -341,19 +463,23 @@ struct GameView: View {
     }
 
     private func triggerAnalysis() {
-        guard let engine = bridge, isEngineInitialized, !isThinking else { return }
-        isThinking = true
+        guard let engine = bridge, isEngineInitialized, !isThinking, !isAnalyzing else { return }
+        let turnColor = currentTurn
+        isAnalyzing = true
         DispatchQueue.global(qos: .userInitiated).async {
-            let analysisVisits = max(100, Int(Double(currentVisits) * 0.4))
-            engine.sendGtpCommand("think black \(analysisVisits)")
+            let analysisVisits = max(100, Int(Double(self.currentVisits) * 0.4))
+            let p = turnColor == .black ? "black" : "white"
+            _ = engine.sendGtpCommand("think \(p) \(analysisVisits)")
             let res = engine.sendGtpCommand("kata-get-analysis black")
             DispatchQueue.main.async {
-                isThinking = false
+                self.isAnalyzing = false
                 if let response = res, response.hasPrefix("=") {
                     let jsonStr = response.replacingOccurrences(of: "=", with: "").trimmingCharacters(in: .whitespacesAndNewlines)
-                    if let data = jsonStr.data(using: .utf8), let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any], let rootInfo = json["rootInfo"] as? [String: Any] {
-                        analysis.winrate = rootInfo["winrate"] as? Double ?? 0.5
-                        analysis.scoreLead = rootInfo["scoreLead"] as? Double ?? 0.0
+                    if let data = jsonStr.data(using: .utf8),
+                       let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                       let rootInfo = json["rootInfo"] as? [String: Any] {
+                        self.analysis.winrate = rootInfo["winrate"] as? Double ?? 0.5
+                        self.analysis.scoreLead = rootInfo["scoreLead"] as? Double ?? 0.0
                     }
                 }
             }
@@ -459,18 +585,19 @@ struct GameView: View {
             }
             
             DispatchQueue.main.async {
-                boardState = board
-                lastMove = last
-                previewMove = nil
-                finalScore = nil
-                analysis = AnalysisResult()
-                consecutivePasses = passes
-                moveHistory = history
-                redoStack = []
-                gameMode = settings.mode
-                currentTurn = nextTurn
-                isThinking = false
-                checkAiTurn()
+                self.boardState = board
+                self.lastMove = last
+                self.previewMove = nil
+                self.finalScore = nil
+                self.analysis = AnalysisResult()
+                self.consecutivePasses = passes
+                self.moveHistory = history
+                self.redoStack = []
+                self.gameMode = settings.mode
+                self.currentTurn = nextTurn
+                self.syncBoardFromEngine()
+                self.isThinking = false
+                self.checkAiTurn()
             }
         }
     }
@@ -489,11 +616,9 @@ struct GameView: View {
         guard !isThinking, let last = moveHistory.popLast() else { return }
         bridge?.sendGtpCommand("undo")
         redoStack.append(last)
-        if !last.isPass {
-            boardState[last.y][last.x] = .empty
-        }
         lastMove = moveHistory.last(where: { !$0.isPass }).map { ($0.x, $0.y) }
         currentTurn = Stone(rawValue: last.stone) ?? .black
+        syncBoardFromEngine()
         
         var passes = 0
         for m in moveHistory.reversed() {
@@ -514,16 +639,11 @@ struct GameView: View {
         let cmd = next.isPass ? "play \(next.stone == 1 ? "black" : "white") pass" : "play \(next.stone == 1 ? "black" : "white") \(toGtpCoord(x: next.x, y: next.y))"
         if bridge?.sendGtpCommand(cmd)?.hasPrefix("=") == true {
             moveHistory.append(next)
-            if !next.isPass {
-                boardState[next.y][next.x] = Stone(rawValue: next.stone) ?? .empty
-                lastMove = (next.x, next.y)
-                consecutivePasses = 0
-            } else {
-                lastMove = moveHistory.last(where: { !$0.isPass }).map { ($0.x, $0.y) }
-                consecutivePasses += 1
-            }
+            lastMove = next.isPass ? moveHistory.last(where: { !$0.isPass }).map { ($0.x, $0.y) } : (next.x, next.y)
+            consecutivePasses = next.isPass ? (consecutivePasses + 1) : 0
             currentTurn = (next.stone == 1 ? .white : .black)
             PersistedMove.saveAll(moveHistory)
+            syncBoardFromEngine()
             
             if showAnalysis { triggerAnalysis() }
         }
@@ -737,6 +857,7 @@ struct ActionButton: View {
 
 struct RotatingRingView: View {
     var color: Color = Color(red: 100/255, green: 200/255, blue: 255/255)
+    var lineWidth: CGFloat = 2.5
     @State private var isRotating = 0.0
     
     var body: some View {
@@ -744,17 +865,38 @@ struct RotatingRingView: View {
             .trim(from: 0, to: 0.75)
             .stroke(
                 AngularGradient(
-                    gradient: Gradient(colors: [color, color.opacity(0.2)]),
+                    gradient: Gradient(colors: [color, color.opacity(0.15)]),
                     center: .center
                 ),
-                style: StrokeStyle(lineWidth: 2.5, lineCap: .round)
+                style: StrokeStyle(lineWidth: lineWidth, lineCap: .round)
             )
-            .frame(width: 20, height: 20)
             .rotationEffect(Angle(degrees: isRotating))
             .onAppear {
-                withAnimation(Animation.linear(duration: 1.0).repeatForever(autoreverses: false)) {
+                withAnimation(Animation.linear(duration: 0.85).repeatForever(autoreverses: false)) {
                     isRotating = 360.0
                 }
             }
+    }
+}
+
+struct ThinkingDotsView: View {
+    var color: Color = Color(red: 100/255, green: 200/255, blue: 255/255)
+    @State private var phase = 0
+    
+    var body: some View {
+        HStack(spacing: 3) {
+            ForEach(0..<3) { index in
+                Circle()
+                    .fill(color)
+                    .frame(width: 4.5, height: 4.5)
+                    .scaleEffect(phase == index ? 1.35 : 0.75)
+                    .opacity(phase == index ? 1.0 : 0.35)
+            }
+        }
+        .onAppear {
+            Timer.scheduledTimer(withTimeInterval: 0.3, repeats: true) { _ in
+                phase = (phase + 1) % 3
+            }
+        }
     }
 }

@@ -8,8 +8,8 @@ A **fully free** and **completely offline** native iOS Go (Weiqi) application po
 - **100% Offline**: All AI computations happen on-device. No data usage, no latency, and privacy-focused.
 - **Always Free**: No subscriptions or hidden costs. Play as many games as you want.
 - **Game Modes**:
-  - **You are Black**: Play against the AI.
-  - **You are White**: AI plays first.
+  - **I'm Black**: Play against the AI.
+  - **I'm White**: AI plays first.
   - **Human vs Human**: Local multiplayer.
   - **AI vs AI**: Watch the engine play against itself.
 - **Modern UI**: Built with SwiftUI for a smooth, native iOS experience.
@@ -17,13 +17,13 @@ A **fully free** and **completely offline** native iOS Go (Weiqi) application po
 ## Performance Optimization (CRITICAL)
 
 ### 1. Build in Release Mode
-The engine uses the **Eigen (CPU)** backend. To achieve playable speeds (1-3 seconds per move), you **MUST** run the app in **Release** mode.
+The engine uses the **Metal (GPU)** backend via Apple's Metal Performance Shaders Graph (MPSGraph). To achieve maximum performance, run the app in **Release** mode.
 - In Xcode, go to **Product > Scheme > Edit Scheme...**
 - Select **Run** on the left.
 - Change **Build Configuration** from `Debug` to **`Release`**.
 
 ### 2. Search Depth
-The search is currently limited to **100 visits** in `ios/Weiqi/Assets/gtp.cfg`. This provides a strong level of play while ensuring fast response times on mobile hardware.
+The search is configured via `Weiqi/Assets/gtp.cfg`. The GPU backend delivers rapid neural evaluations directly on Apple Silicon.
 
 ## Development & Build Instructions
 
@@ -32,24 +32,20 @@ The search is currently limited to **100 visits** in `ios/Weiqi/Assets/gtp.cfg`.
 - **XcodeGen**: Install via Homebrew: `brew install xcodegen`
 
 ### Getting Started
-1. Navigate to the `ios` folder:
-   ```bash
-   cd ios
-   ```
-2. Generate the Xcode project:
+1. Generate the Xcode project:
    ```bash
    xcodegen
    ```
-3. Open the project:
+2. Open the project:
    ```bash
    open Weiqi.xcodeproj
    ```
 
 ## Architecture
-- **UI Layer**: SwiftUI (`ios/Weiqi/Views/`)
-- **Bridge Layer**: Objective-C++ Wrapper (`ios/Weiqi/KataGoWrapper.mm`)
-- **Engine Layer**: KataGo C++ Source (`weiqi/third_party/katago/cpp/`)
-- **Backend**: Eigen (CPU) for maximum compatibility and stability on iOS.
+- **UI Layer**: SwiftUI (`Weiqi/Views/`)
+- **Bridge Layer**: Objective-C++ Wrapper (`Weiqi/KataGoWrapper.mm`)
+- **Engine Layer**: KataGo C++ Source (`Weiqi/external/katago/cpp/`)
+- **Backend**: Metal (GPU via Apple MPSGraph) with C++/Swift interoperability.
 
 ## Troubleshooting
 

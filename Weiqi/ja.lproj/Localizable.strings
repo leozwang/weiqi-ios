@@ -18,8 +18,13 @@
 "Amateur" = "アマチュア";
 "Advanced" = "上級";
 "Pro" = "プロ";
+"I'm Black" = "自分が黒番";
+"I'm White" = "自分が白番";
 "You are Black" = "自分が黒番";
 "You are White" = "自分が白番";
+"You're Black" = "自分が黒番";
+"You're White" = "自分が白番";
+"You're white" = "自分が白番";
 "Two Players" = "二人対局";
 "AI vs AI" = "AI 対局";
 "You" = "あなた";

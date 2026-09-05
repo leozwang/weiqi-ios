@@ -18,8 +18,13 @@
 "Amateur" = "Amateur";
 "Advanced" = "Advanced";
 "Pro" = "Pro";
-"You are Black" = "You are Black";
-"You are White" = "You are White";
+"I'm Black" = "I'm Black";
+"I'm White" = "I'm White";
+"You are Black" = "I'm Black";
+"You are White" = "I'm White";
+"You're Black" = "I'm Black";
+"You're White" = "I'm White";
+"You're white" = "I'm White";
 "Two Players" = "Two Players";
 "AI vs AI" = "AI vs AI";
 "You" = "You";

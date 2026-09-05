@@ -185,6 +185,21 @@ std::string KataGoBridge::sendGtpCommand(const std::string& command) {
         return "= ";
     }
 
+    if (mainCmd == "get_board") {
+        const Board& b = bot->getRootBoard();
+        std::string resp = "= ";
+        for (int y = 0; y < b.y_size; y++) {
+            for (int x = 0; x < b.x_size; x++) {
+                Player color = b.colors[Location::getLoc(x, y, b.x_size)];
+                if (color == P_BLACK) resp += "1";
+                else if (color == P_WHITE) resp += "2";
+                else resp += "0";
+            }
+        }
+        resp += " " + std::to_string(b.numWhiteCaptures) + " " + std::to_string(b.numBlackCaptures);
+        return resp;
+    }
+
     if (mainCmd == "final_score") {
         bot->stopAndWait();
         BoardHistory histCopy = bot->getRootHist();

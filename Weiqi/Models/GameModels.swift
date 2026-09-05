@@ -7,10 +7,32 @@ enum Stone: Int {
 }
 
 enum GameMode: String, CaseIterable, Codable {
-    case userBlack = "You are Black"
-    case userWhite = "You are White"
+    case userBlack = "I'm Black"
+    case userWhite = "I'm White"
     case userBoth = "Two Players"
     case aiBoth = "AI vs AI"
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        let raw = try container.decode(String.self)
+        switch raw {
+        case "I'm Black", "You are Black", "You're Black":
+            self = .userBlack
+        case "I'm White", "You are White", "You're White", "You're white":
+            self = .userWhite
+        case "Two Players":
+            self = .userBoth
+        case "AI vs AI":
+            self = .aiBoth
+        default:
+            self = GameMode(rawValue: raw) ?? .userBlack
+        }
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encode(rawValue)
+    }
     
     var description: String {
         switch self {

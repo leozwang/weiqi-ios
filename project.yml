@@ -4,9 +4,25 @@ options:
   deploymentTarget:
     iOS: 16.0
 targets:
+  KataGoSwift:
+    type: library.static
+    platform: iOS
+    sources:
+      - path: Weiqi/external/katago/cpp/neuralnet/metalbackend.swift
+      - path: Weiqi/external/katago/cpp/neuralnet/metallayers.swift
+    settings:
+      PRODUCT_MODULE_NAME: KataGoSwift
+      SWIFT_CXX_INTEROPERABILITY_MODE: default
+      DEFINES_MODULE: YES
+    frameworks:
+      - MetalPerformanceShaders
+      - MetalPerformanceShadersGraph
+
   Weiqi:
     type: application
     platform: iOS
+    dependencies:
+      - target: KataGoSwift
     sources:
       - path: Weiqi
         excludes:
@@ -20,7 +36,7 @@ targets:
           - cudabackend.cpp
           - cudautils.cpp
           - trtbackend.cpp
-          - metalbackend.cpp
+          - eigenbackend.cpp
           - metalbackend.swift
           - metallayers.swift
           - openclbackend.cpp
@@ -44,11 +60,12 @@ targets:
       SWIFT_USE_EXPLICIT_MODULE_BUILD: NO
       OTHER_LDFLAGS: "-lz"
       OTHER_CPLUSPLUSFLAGS: >
-        -std=c++20 -DUSE_EIGEN_BACKEND -DNO_GIT_REVISION -DNO_LIBZIP
+        -std=c++20 -DUSE_METAL_BACKEND -DNO_GIT_REVISION -DNO_LIBZIP
         -Wno-documentation -Wno-documentation-deprecated-sync -Wno-deprecated-anon-enum-enum-conversion
         -Wno-unused-variable -Wno-shorten-64-to-32
       HEADER_SEARCH_PATHS:
         - $(SRCROOT)/Weiqi/external/katago/cpp
+        - $(SRCROOT)/Weiqi/external/katago/cpp/neuralnet
         - $(SRCROOT)/Weiqi/external/katago/cpp/external
         - $(SRCROOT)/Weiqi/external/katago/cpp/external/tclap-1.2.5/include
         - $(SRCROOT)/Weiqi/external/katago/cpp/external/filesystem-1.5.8/include
@@ -58,3 +75,6 @@ targets:
       - CoreGraphics
       - Foundation
       - SwiftUI
+      - Metal
+      - MetalPerformanceShaders
+      - MetalPerformanceShadersGraph

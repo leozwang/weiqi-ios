@@ -16,6 +16,7 @@
 		15D5FA97545FDA5D0CCC9C9C /* mainargs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EB3153FC00213E4B2397A74C /* mainargs.cpp */; };
 		17676FB0A5B0006AE7C1DBED /* searchnode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 832E38E0CDBFFFDBF69814F3 /* searchnode.cpp */; };
 		19A09F3760F1B2151ABFF779 /* nneval.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AEC8C25DC73FF5558700B533 /* nneval.cpp */; };
+		1EF92D05B0EA82D9043DA631 /* metalbackend.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDDB978305222379D2A7FFFE /* metalbackend.swift */; };
 		21DFB37B3A1C5E0532460D6E /* searchupdatehelpers.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EEC27C38925CEECEE367B22B /* searchupdatehelpers.cpp */; };
 		22125B75A28D7EFF596BDD88 /* fileutils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 45EC2E31A5FF3388AADC8C82 /* fileutils.cpp */; };
 		228B60C6429784CF05AF388B /* KataGoWrapper.mm in Sources */ = {isa = PBXBuildFile; fileRef = 7E95D52960F77568DB6E3FD8 /* KataGoWrapper.mm */; };
@@ -25,6 +26,7 @@
 		2DAC082DA639EB117508043D /* hash.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 40B90FA126E6BFAF0AD65E70 /* hash.cpp */; };
 		32A6741FFB18C7F674D774CB /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 22A0B0F1D4634F6F49EB9331 /* Assets.xcassets */; };
 		350311D0122CFDEA3B2400E3 /* distributiontable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4034036477229DCD3B5A9154 /* distributiontable.cpp */; };
+		373469580B220CACE328B9EE /* metallayers.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC59EB7F513C31EC2F2A808D /* metallayers.swift */; };
 		376BC1D3C66C0EE68E38C739 /* searchhelpers.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 541B2F4D8A94DC8BECE08B8B /* searchhelpers.cpp */; };
 		3B2E096524A6325B6C436307 /* elo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 67D814362D4D0DB67890AE59 /* elo.cpp */; };
 		3E6F9F941640459E3EFACCD0 /* analysisdata.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3ACE7CFC2A5414AA96CDECCA /* analysisdata.cpp */; };
@@ -55,7 +57,6 @@
 		8645D80A82C7D85BA18B3BED /* play.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1959A80BFEF3F9FF6D190B95 /* play.cpp */; };
 		89DE1644070097537ECF7464 /* threadsafequeue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9FD64A7907F0AB9E8CBDA818 /* threadsafequeue.cpp */; };
 		8CEA46C1A9EF9405D9E73764 /* localpattern.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DCD2548EF7714165A6EEBD42 /* localpattern.cpp */; };
-		9026E6F7938A9ECA9BC8ED50 /* eigenbackend.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 929B737A70D1F22CE0595276 /* eigenbackend.cpp */; };
 		926D868F525A6906B2E3C614 /* parallel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AB198E7C3834507384197504 /* parallel.cpp */; };
 		931575AA442B677F1BB0AA44 /* loadmodel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F246285BBC858C1624E85D18 /* loadmodel.cpp */; };
 		9C9695DDD314462822285ABC /* rand_helpers.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A42803AA567B0587CCC77C12 /* rand_helpers.cpp */; };
@@ -66,6 +67,7 @@
 		AB54A1D0F9E7EA6D492A9540 /* searchnodetable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1CC5602C1FE3C18C6E2971A /* searchnodetable.cpp */; };
 		AB7D42A8B6AA4329F97F4F6D /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F02FB587E9C971FB65C4DB /* ViewController.swift */; };
 		AED4ECF63008AB27ECD69235 /* searchresults.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D8E58872FB3E43DC0874E1BC /* searchresults.cpp */; };
+		AFA73412FBF771FBE5DA23CF /* libKataGoSwift.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4C245958DBA2359157C924BD /* libKataGoSwift.a */; };
 		B174B3364367A0B573E7964B /* board.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2150945D6BD44C62FC613834 /* board.cpp */; };
 		B216034259AC1342B5192BE4 /* searchnnhelpers.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94E62B530991B4CAB348F79B /* searchnnhelpers.cpp */; };
 		B537A76BFA382367CEF9602F /* mutexpool.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BA88FDC9A780DF3EB28F2588 /* mutexpool.cpp */; };
@@ -89,6 +91,7 @@
 		DF8EB1528B7ABE8E23B2B38C /* asyncbot.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49D37189B02567322518B1DA /* asyncbot.cpp */; };
 		DFADEA653B41FE78E98CE77D /* trainingwrite.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C3AC67E364AC223035D2C43 /* trainingwrite.cpp */; };
 		E0BB6B6A3E07F26AE283A610 /* KataGoBridge.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0BAFCE6C7070963EFC5319FB /* KataGoBridge.cpp */; };
+		E3653154BD9AAB4F2ACE886C /* metalbackend.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 15FBF64624B488759C2F4875 /* metalbackend.cpp */; };
 		E76BC0F7846D360D6DF1B9E1 /* bookcssjs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C2BE8D87FA4103CC627E282 /* bookcssjs.cpp */; };
 		E7A3804C3A0E056CD367468C /* searchprint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D1D1D506A6D82F4BF4E75A0B /* searchprint.cpp */; };
 		EE2AEB2E24D55DCFA2D1A45D /* rules.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2C40768D6B88365895DD02C3 /* rules.cpp */; };
@@ -98,6 +101,16 @@
 		FAED2A9949FF99EBEC354D5A /* config_parser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 870B8A9E2BAB5D7C2403E4A6 /* config_parser.cpp */; };
 		FFC11C6245A006B5E2AA1A0F /* modelversion.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DD8283FE703315449FA4942E /* modelversion.cpp */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		F4304E16073E1AB3556DE3C8 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 7B89B2492CD54771518FBC0E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = FE9F5893B50A3FDD5C4EC8DF;
+			remoteInfo = KataGoSwift;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		02B6D64576F6124495658AD0 /* base64.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = base64.cpp; sourceTree = "<group>"; };
@@ -110,6 +123,7 @@
 		14C9090CD50610D32D95C083 /* graphhash.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = graphhash.h; sourceTree = "<group>"; };
 		158CBA866CBDF46056C90099 /* prioritymutex.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = prioritymutex.h; sourceTree = "<group>"; };
 		15BBA35441E0D6EDC22C0ACF /* cudaerrorcheck.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = cudaerrorcheck.h; sourceTree = "<group>"; };
+		15FBF64624B488759C2F4875 /* metalbackend.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = metalbackend.cpp; sourceTree = "<group>"; };
 		16788383816727C10419EE09 /* numpywrite.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = numpywrite.cpp; sourceTree = "<group>"; };
 		1783F84AC05FF4E4CF2FDF40 /* md5.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = md5.h; sourceTree = "<group>"; };
 		1959A80BFEF3F9FF6D190B95 /* play.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = play.cpp; sourceTree = "<group>"; };
@@ -133,6 +147,7 @@
 		3218E93095AE26DAFE1A6CAA /* asyncbot.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = asyncbot.h; sourceTree = "<group>"; };
 		340484DFC30CCAEB5D02DA43 /* mainargs.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mainargs.h; sourceTree = "<group>"; };
 		343BC8E1D3232443D633B72E /* searchprint.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = searchprint.h; sourceTree = "<group>"; };
+		35BB4B42C1EEED9F657E03B6 /* KataGoSwift-Swift.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "KataGoSwift-Swift.h"; sourceTree = "<group>"; };
 		37BCC115849BE85C1FEBC581 /* timecontrols.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = timecontrols.cpp; sourceTree = "<group>"; };
 		38CD326C997EE2F848FA79D2 /* fileutils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = fileutils.h; sourceTree = "<group>"; };
 		3ACE7CFC2A5414AA96CDECCA /* analysisdata.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = analysisdata.cpp; sourceTree = "<group>"; };
@@ -146,6 +161,7 @@
 		43750BD6FB2590C8BD8DAE86 /* threadtest.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = threadtest.h; sourceTree = "<group>"; };
 		45EC2E31A5FF3388AADC8C82 /* fileutils.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = fileutils.cpp; sourceTree = "<group>"; };
 		49D37189B02567322518B1DA /* asyncbot.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = asyncbot.cpp; sourceTree = "<group>"; };
+		4C245958DBA2359157C924BD /* libKataGoSwift.a */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = archive.ar; path = libKataGoSwift.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		4C2F40CCC0A29EA438883063 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/Localizable.strings; sourceTree = "<group>"; };
 		4D4761215E19E36804372B37 /* selfplaymanager.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = selfplaymanager.cpp; sourceTree = "<group>"; };
 		4DAF501C5BCD0E25D20BB154 /* multithread.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = multithread.cpp; sourceTree = "<group>"; };
@@ -186,7 +202,6 @@
 		8977E8D86DB48A7B44B47C60 /* Weiqi.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Weiqi.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		90C4CC6A86A9226A35D173AB /* book.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = book.h; sourceTree = "<group>"; };
 		9126D69263D433F46A2314A2 /* logger.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = logger.h; sourceTree = "<group>"; };
-		929B737A70D1F22CE0595276 /* eigenbackend.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = eigenbackend.cpp; sourceTree = "<group>"; };
 		92EAB387DE4B16E48E0D5567 /* mutexpool.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mutexpool.h; sourceTree = "<group>"; };
 		932857C3688392780E44AB19 /* board.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = board.h; sourceTree = "<group>"; };
 		94E62B530991B4CAB348F79B /* searchnnhelpers.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = searchnnhelpers.cpp; sourceTree = "<group>"; };
@@ -230,6 +245,7 @@
 		BA88FDC9A780DF3EB28F2588 /* mutexpool.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = mutexpool.cpp; sourceTree = "<group>"; };
 		BB263F2C0F85558FAAA49EF2 /* sha2.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = sha2.cpp; sourceTree = "<group>"; };
 		BC0F23A9E2C2ED3049E6DD2A /* threadsafecounter.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = threadsafecounter.cpp; sourceTree = "<group>"; };
+		BC59EB7F513C31EC2F2A808D /* metallayers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = metallayers.swift; sourceTree = "<group>"; };
 		BC63FA282E33B948DADB1D9D /* boardhistory.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = boardhistory.cpp; sourceTree = "<group>"; };
 		BC6D499A07320B79AE8227C2 /* commandloop.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = commandloop.cpp; sourceTree = "<group>"; };
 		BCF7690B5605A14442D5BE80 /* rand_helpers.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = rand_helpers.h; sourceTree = "<group>"; };
@@ -251,6 +267,7 @@
 		DCD2548EF7714165A6EEBD42 /* localpattern.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = localpattern.cpp; sourceTree = "<group>"; };
 		DD8283FE703315449FA4942E /* modelversion.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = modelversion.cpp; sourceTree = "<group>"; };
 		DDD7D1C5519C7A97D82FEB49 /* datetime.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = datetime.cpp; sourceTree = "<group>"; };
+		DDDB978305222379D2A7FFFE /* metalbackend.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = metalbackend.swift; sourceTree = "<group>"; };
 		DE111779C763CC96F26471EF /* global.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = global.cpp; sourceTree = "<group>"; };
 		E0256612154F71CA03307952 /* localpattern.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = localpattern.h; sourceTree = "<group>"; };
 		E0F4BE97D16A510BC1272187 /* nninputs.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = nninputs.h; sourceTree = "<group>"; };
@@ -279,10 +296,22 @@
 		FFE99FFE6F7053840DCADE39 /* setup.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = setup.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
+/* Begin PBXFrameworksBuildPhase section */
+		1D0854617276E1782E1C1943 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AFA73412FBF771FBE5DA23CF /* libKataGoSwift.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
 /* Begin PBXGroup section */
 		2400828B5BE87F67E77E2433 /* Products */ = {
 			isa = PBXGroup;
 			children = (
+				4C245958DBA2359157C924BD /* libKataGoSwift.a */,
 				8977E8D86DB48A7B44B47C60 /* Weiqi.app */,
 			);
 			name = Products;
@@ -439,8 +468,11 @@
 				9631DAC6C51DDCC17C116528 /* cudautils.h */,
 				6D6EB7884E59E6D62B762ADD /* desc.cpp */,
 				108598C0CCD082E1E95421EA /* desc.h */,
-				929B737A70D1F22CE0595276 /* eigenbackend.cpp */,
+				35BB4B42C1EEED9F657E03B6 /* KataGoSwift-Swift.h */,
+				15FBF64624B488759C2F4875 /* metalbackend.cpp */,
 				FA8B108BF30CE14221C78780 /* metalbackend.h */,
+				DDDB978305222379D2A7FFFE /* metalbackend.swift */,
+				BC59EB7F513C31EC2F2A808D /* metallayers.swift */,
 				DD8283FE703315449FA4942E /* modelversion.cpp */,
 				42D04230CF9236E441AFB3AE /* modelversion.h */,
 				AEC8C25DC73FF5558700B533 /* nneval.cpp */,
@@ -582,10 +614,12 @@
 			buildPhases = (
 				BFCD19BA9D75AA00AC243B25 /* Sources */,
 				E60C70DFE5C20EE417198CF4 /* Resources */,
+				1D0854617276E1782E1C1943 /* Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				21D55DB8DCDFF59779998769 /* PBXTargetDependency */,
 			);
 			name = Weiqi;
 			packageProductDependencies = (
@@ -593,6 +627,24 @@
 			productName = Weiqi;
 			productReference = 8977E8D86DB48A7B44B47C60 /* Weiqi.app */;
 			productType = "com.apple.product-type.application";
+		};
+		FE9F5893B50A3FDD5C4EC8DF /* KataGoSwift */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 927EACA0D418A18EAC8A2ABE /* Build configuration list for PBXNativeTarget "KataGoSwift" */;
+			buildPhases = (
+				54F7E14FF48916392A63315B /* Sources */,
+				BE9C6F2424F1D2C14680A242 /* Copy Swift Objective-C Interface Header */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = KataGoSwift;
+			packageProductDependencies = (
+			);
+			productName = KataGoSwift;
+			productReference = 4C245958DBA2359157C924BD /* libKataGoSwift.a */;
+			productType = "com.apple.product-type.library.static";
 		};
 /* End PBXNativeTarget section */
 
@@ -624,6 +676,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
+				FE9F5893B50A3FDD5C4EC8DF /* KataGoSwift */,
 				C2901A127A1A89283470A03C /* Weiqi */,
 			);
 		};
@@ -646,7 +699,35 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		BE9C6F2424F1D2C14680A242 /* Copy Swift Objective-C Interface Header */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"$(DERIVED_SOURCES_DIR)/$(SWIFT_OBJC_INTERFACE_HEADER_NAME)",
+			);
+			name = "Copy Swift Objective-C Interface Header";
+			outputPaths = (
+				"$(BUILT_PRODUCTS_DIR)/include/$(PRODUCT_MODULE_NAME)/$(SWIFT_OBJC_INTERFACE_HEADER_NAME)",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "ditto \"${SCRIPT_INPUT_FILE_0}\" \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
+		54F7E14FF48916392A63315B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1EF92D05B0EA82D9043DA631 /* metalbackend.swift in Sources */,
+				373469580B220CACE328B9EE /* metallayers.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		BFCD19BA9D75AA00AC243B25 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -673,7 +754,6 @@
 				CC3FEEF77631A2279F7EA69E /* datetime.cpp in Sources */,
 				615AB4E57443A8CF91DC69EA /* desc.cpp in Sources */,
 				350311D0122CFDEA3B2400E3 /* distributiontable.cpp in Sources */,
-				9026E6F7938A9ECA9BC8ED50 /* eigenbackend.cpp in Sources */,
 				3B2E096524A6325B6C436307 /* elo.cpp in Sources */,
 				2A583734CE0CAB76F311FC24 /* evalcache.cpp in Sources */,
 				63CB3BF888D4857EDF89C603 /* fancymath.cpp in Sources */,
@@ -690,6 +770,7 @@
 				15D5FA97545FDA5D0CCC9C9C /* mainargs.cpp in Sources */,
 				C35F784B97B0D6F2B706BBB1 /* makedir.cpp in Sources */,
 				D9D49FBD438975E8CA990A13 /* md5.cpp in Sources */,
+				E3653154BD9AAB4F2ACE886C /* metalbackend.cpp in Sources */,
 				FFC11C6245A006B5E2AA1A0F /* modelversion.cpp in Sources */,
 				C3AC1D700691A84FC1532D26 /* multithread.cpp in Sources */,
 				B537A76BFA382367CEF9602F /* mutexpool.cpp in Sources */,
@@ -738,6 +819,14 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		21D55DB8DCDFF59779998769 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = FE9F5893B50A3FDD5C4EC8DF /* KataGoSwift */;
+			targetProxy = F4304E16073E1AB3556DE3C8 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		788E72FBBA43F5989E2063F9 /* Localizable.strings */ = {
@@ -818,6 +907,7 @@
 				DEVELOPMENT_TEAM = 5QS428JSKE;
 				HEADER_SEARCH_PATHS = (
 					"$(SRCROOT)/Weiqi/external/katago/cpp",
+					"$(SRCROOT)/Weiqi/external/katago/cpp/neuralnet",
 					"$(SRCROOT)/Weiqi/external/katago/cpp/external",
 					"$(SRCROOT)/Weiqi/external/katago/cpp/external/tclap-1.2.5/include",
 					"$(SRCROOT)/Weiqi/external/katago/cpp/external/filesystem-1.5.8/include",
@@ -830,8 +920,11 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.11;
-				OTHER_CPLUSPLUSFLAGS = "-std=c++20 -DUSE_EIGEN_BACKEND -DNO_GIT_REVISION -DNO_LIBZIP -Wno-documentation -Wno-documentation-deprecated-sync -Wno-deprecated-anon-enum-enum-conversion -Wno-unused-variable -Wno-shorten-64-to-32\n";
-				OTHER_LDFLAGS = "-lz";
+				OTHER_CPLUSPLUSFLAGS = "-std=c++20 -DUSE_METAL_BACKEND -DNO_GIT_REVISION -DNO_LIBZIP -Wno-documentation -Wno-documentation-deprecated-sync -Wno-deprecated-anon-enum-enum-conversion -Wno-unused-variable -Wno-shorten-64-to-32\n";
+				OTHER_LDFLAGS = (
+					"-lz",
+					"-ObjC",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.cwave.weiqi;
 				SDKROOT = iphoneos;
 				SWIFT_OBJC_BRIDGING_HEADER = "Weiqi/Weiqi-Bridging-Header.h";
@@ -849,6 +942,7 @@
 				DEVELOPMENT_TEAM = 5QS428JSKE;
 				HEADER_SEARCH_PATHS = (
 					"$(SRCROOT)/Weiqi/external/katago/cpp",
+					"$(SRCROOT)/Weiqi/external/katago/cpp/neuralnet",
 					"$(SRCROOT)/Weiqi/external/katago/cpp/external",
 					"$(SRCROOT)/Weiqi/external/katago/cpp/external/tclap-1.2.5/include",
 					"$(SRCROOT)/Weiqi/external/katago/cpp/external/filesystem-1.5.8/include",
@@ -861,8 +955,11 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.11;
-				OTHER_CPLUSPLUSFLAGS = "-std=c++20 -DUSE_EIGEN_BACKEND -DNO_GIT_REVISION -DNO_LIBZIP -Wno-documentation -Wno-documentation-deprecated-sync -Wno-deprecated-anon-enum-enum-conversion -Wno-unused-variable -Wno-shorten-64-to-32\n";
-				OTHER_LDFLAGS = "-lz";
+				OTHER_CPLUSPLUSFLAGS = "-std=c++20 -DUSE_METAL_BACKEND -DNO_GIT_REVISION -DNO_LIBZIP -Wno-documentation -Wno-documentation-deprecated-sync -Wno-deprecated-anon-enum-enum-conversion -Wno-unused-variable -Wno-shorten-64-to-32\n";
+				OTHER_LDFLAGS = (
+					"-lz",
+					"-ObjC",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.cwave.weiqi;
 				SDKROOT = iphoneos;
 				SWIFT_OBJC_BRIDGING_HEADER = "Weiqi/Weiqi-Bridging-Header.h";
@@ -934,6 +1031,40 @@
 			};
 			name = Debug;
 		};
+		F4D651481FC4D6937E39D299 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DEFINES_MODULE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.cwave.KataGoSwift;
+				PRODUCT_MODULE_NAME = KataGoSwift;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_CXX_INTEROPERABILITY_MODE = default;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		F8D653B35A28B3AEEED11E1F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DEFINES_MODULE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.cwave.KataGoSwift;
+				PRODUCT_MODULE_NAME = KataGoSwift;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_CXX_INTEROPERABILITY_MODE = default;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -942,6 +1073,15 @@
 			buildConfigurations = (
 				2AE810BECD7FBF084A6A3709 /* Debug */,
 				7047E1D8CA06DE301DC2B41C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		927EACA0D418A18EAC8A2ABE /* Build configuration list for PBXNativeTarget "KataGoSwift" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F8D653B35A28B3AEEED11E1F /* Debug */,
+				F4D651481FC4D6937E39D299 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
