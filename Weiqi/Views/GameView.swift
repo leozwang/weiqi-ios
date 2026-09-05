@@ -767,8 +767,8 @@ struct SettingsView: View {
     @ObservedObject private var soundManager = SoundManager.shared
 
     private var appVersion: String {
-        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.11"
-        let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "12"
+        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.12"
+        let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "13"
         return "\(version) (\(build))"
     }
 
