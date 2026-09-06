@@ -171,6 +171,8 @@ std::string KataGoBridge::sendGtpCommand(const std::string& command) {
         if (hist.moveHistory.size() == 0) return "? cannot undo";
         Board board = hist.initialBoard;
         BoardHistory newHist(board, hist.initialPla, hist.rules, hist.initialEncorePhase);
+        newHist.setAssumeMultipleStartingBlackMovesAreHandicap(hist.assumeMultipleStartingBlackMovesAreHandicap);
+        newHist.setInitialTurnNumber(hist.initialTurnNumber);
         for (size_t i = 0; i < hist.moveHistory.size() - 1; i++) {
             newHist.makeBoardMoveAssumeLegal(board, hist.moveHistory[i].loc, hist.moveHistory[i].pla, nullptr);
         }
@@ -183,6 +185,43 @@ std::string KataGoBridge::sendGtpCommand(const std::string& command) {
         BoardHistory hist(board, P_BLACK, bot->getRootHist().rules, 0);
         bot->setPosition(P_BLACK, board, hist);
         return "= ";
+    }
+
+    if (mainCmd == "fixed_handicap") {
+        if (parts.size() < 2) return "? missing count";
+        int n = 0;
+        try { n = std::stoi(parts[1]); } catch (...) { return "? invalid count"; }
+        if (n < 1 || n > 9) return "? invalid count";
+        int xSize = bot->getRootBoard().x_size;
+        int ySize = bot->getRootBoard().y_size;
+        Board board(xSize, ySize);
+        if (n == 1) {
+            int xCoord = (xSize <= 12) ? xSize - 3 : xSize - 4;
+            int yCoord = (ySize <= 12) ? 2 : 3;
+            board.setStone(Location::getLoc(xCoord, yCoord, board.x_size), P_BLACK);
+        } else {
+            try {
+                PlayUtils::placeFixedHandicap(board, n);
+            } catch (const StringError& e) {
+                return "? " + std::string(e.what());
+            }
+        }
+        BoardHistory hist(board, P_WHITE, bot->getRootHist().rules, 0);
+        hist.clear(board, P_WHITE, bot->getRootHist().rules, 0);
+        hist.setAssumeMultipleStartingBlackMovesAreHandicap(true);
+        hist.setInitialTurnNumber(board.numStonesOnBoard());
+        bot->setPosition(P_WHITE, board, hist);
+
+        std::string resp = "= ";
+        for (int y = 0; y < board.y_size; y++) {
+            for (int x = 0; x < board.x_size; x++) {
+                Loc loc = Location::getLoc(x, y, board.x_size);
+                if (board.colors[loc] != C_EMPTY) {
+                    resp += Location::toString(loc, board) + " ";
+                }
+            }
+        }
+        return resp;
     }
 
     if (mainCmd == "get_board") {

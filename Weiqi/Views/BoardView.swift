@@ -41,7 +41,7 @@ struct BoardView: View {
                         let stone = boardState[y][x]
                         if stone != .empty {
                             let isDead: Bool = {
-                                guard (showAnalysis || isGameOver) && analysis.ownership.count >= boardSize * boardSize else { return false }
+                                guard isGameOver && analysis.ownership.count >= boardSize * boardSize else { return false }
                                 let score = analysis.ownership[y * boardSize + x]
                                 if stone == .white && score > 0.35 { return true }
                                 if stone == .black && score < -0.35 { return true }
@@ -91,7 +91,7 @@ struct BoardView: View {
                                         )
                                         .position(x: margin + CGFloat(x) * step, y: margin + CGFloat(y) * step)
                                 }
-                            } else if stone != .empty {
+                            } else if isGameOver && stone != .empty {
                                 let isDeadWhite = (stone == .white && score > 0.35)
                                 let isDeadBlack = (stone == .black && score < -0.35)
 
@@ -118,7 +118,18 @@ struct BoardView: View {
                     }
                 }
                 
-                // 6. Preview Move
+                // 6. Recommended Candidate Moves Overlay
+                if showAnalysis && !isGameOver {
+                    ForEach(analysis.candidates) { candidate in
+                        if candidate.x >= 0 && candidate.x < boardSize && candidate.y >= 0 && candidate.y < boardSize && boardState[candidate.y][candidate.x] == .empty {
+                            let isSelected = previewMove?.0 == candidate.x && previewMove?.1 == candidate.y
+                            CandidateBadgeView(candidate: candidate, step: step, isSelected: isSelected)
+                                .position(x: margin + CGFloat(candidate.x) * step, y: margin + CGFloat(candidate.y) * step)
+                        }
+                    }
+                }
+                
+                // 7. Preview Move
                 if let (px, py) = previewMove, boardState[py][px] == .empty {
                     StoneView(stone: currentTurnColor, radius: stoneRadius)
                         .opacity(0.5)
@@ -170,7 +181,7 @@ struct StoneView: View {
                 )
             
             if stone == .white {
-                Circle().stroke(Color.black.opacity(0.1), lineWidth: 0.5)
+                Circle().stroke(Color.black.opacity(0.25), lineWidth: 0.8)
             }
         }
         .frame(width: radius * 2, height: radius * 2)
@@ -225,3 +236,45 @@ struct HoshiOverlay: View {
         }
     }
 }
+
+func candidateBadgeColor(for order: Int) -> Color {
+    switch order {
+    case 1:
+        return Color(red: 26/255, green: 125/255, blue: 245/255) // Vibrant Royal Blue (#1 Top Pick)
+    case 2:
+        return Color(red: 46/255, green: 175/255, blue: 90/255)  // Vibrant Emerald Green (#2 Strong)
+    case 3:
+        return Color(red: 245/255, green: 140/255, blue: 20/255) // Vibrant Amber (#3 Good)
+    default:
+        return Color(red: 145/255, green: 65/255, blue: 215/255) // Vibrant Purple (#4 & #5 Alternative)
+    }
+}
+
+struct CandidateBadgeView: View {
+    let candidate: CandidateMove
+    let step: CGFloat
+    let isSelected: Bool
+    
+    var body: some View {
+        let size = step * 0.94
+        ZStack {
+            Circle()
+                .fill(candidateBadgeColor(for: candidate.order))
+                .frame(width: size, height: size)
+                .shadow(color: Color.black.opacity(0.45), radius: 2.5, x: 0, y: 1.5)
+            
+            Circle()
+                .stroke(
+                    isSelected ? Color.yellow : (candidate.order == 1 ? Color.white : Color.white.opacity(0.85)),
+                    lineWidth: isSelected ? 2.5 : (candidate.order == 1 ? 1.8 : 1.2)
+                )
+                .frame(width: size, height: size)
+            
+            Text("\(candidate.order)")
+                .font(.system(size: size * 0.52, weight: .heavy, design: .rounded))
+                .foregroundColor(.white)
+        }
+        .allowsHitTesting(false)
+    }
+}
+

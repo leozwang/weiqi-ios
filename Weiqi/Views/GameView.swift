@@ -31,6 +31,7 @@ struct GameView: View {
     @State private var passAlertMessage = ""
     @State private var blackCaptures: Int = 0
     @State private var whiteCaptures: Int = 0
+    @State private var showAnalysisLegend = false
 
     private let backgroundColor = Color(red: 24/255, green: 24/255, blue: 28/255)
     private let accentColor = Color(red: 100/255, green: 200/255, blue: 255/255)
@@ -58,6 +59,8 @@ struct GameView: View {
                         showAnalysis.toggle()
                         if showAnalysis {
                             triggerAnalysis()
+                        } else {
+                            analysis.candidates = []
                         }
                     }) {
                         Image(systemName: showAnalysis ? "eye.fill" : "eye.slash")
@@ -119,27 +122,164 @@ struct GameView: View {
                 .padding(.horizontal, 20)
                 .padding(.bottom, 8)
                 
-                // AI Status Row
-                HStack(spacing: 20) {
-                    HStack(spacing: 8) {
-                        Text(LocalizedStringKey("Black Winrate")).font(.system(size: 12, weight: .bold)).foregroundColor(.gray)
-                        Text("\(Int(analysis.winrate * 100))%").font(.system(size: 16, weight: .heavy)).foregroundColor(accentColor)
-                    }
-                    Rectangle().fill(Color.gray.opacity(0.3)).frame(width: 1, height: 20)
-                    HStack(spacing: 8) {
-                        Text(LocalizedStringKey("Score Lead")).font(.system(size: 12, weight: .bold)).foregroundColor(.gray)
-                        Text("\(analysis.scoreLead >= 0 ? "B" : "W")+\(String(format: "%.1f", abs(analysis.scoreLead)))").font(.system(size: 16, weight: .heavy)).foregroundColor(accentColor)
+                // MARK: Fixed-Height Status & Analysis Container (Eliminates Board Shifting)
+                VStack(spacing: 4) {
+                    if showAnalysis && finalScore == nil {
+                        // AI Winrate & Score Lead Row
+                        HStack(spacing: 12) {
+                            HStack(spacing: 6) {
+                                Text(LocalizedStringKey("Black Winrate")).font(.system(size: 11, weight: .bold)).foregroundColor(.gray)
+                                Text("\(Int(analysis.winrate * 100))%").font(.system(size: 15, weight: .heavy)).foregroundColor(accentColor)
+                            }
+                            Rectangle().fill(Color.gray.opacity(0.3)).frame(width: 1, height: 16)
+                            HStack(spacing: 6) {
+                                Text(LocalizedStringKey("Score Lead")).font(.system(size: 11, weight: .bold)).foregroundColor(.gray)
+                                Text("\(analysis.scoreLead >= 0 ? "B" : "W")+\(String(format: "%.1f", abs(analysis.scoreLead)))").font(.system(size: 15, weight: .heavy)).foregroundColor(accentColor)
+                            }
+                            
+                            Rectangle().fill(Color.gray.opacity(0.3)).frame(width: 1, height: 16)
+                            
+                            Button(action: { showAnalysisLegend = true }) {
+                                HStack(spacing: 3) {
+                                    Image(systemName: "info.circle.fill")
+                                        .font(.system(size: 11))
+                                    Text("Guide")
+                                        .font(.system(size: 11, weight: .bold))
+                                }
+                                .foregroundColor(Color.white.opacity(0.85))
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(Color.white.opacity(0.12))
+                                .cornerRadius(6)
+                                .contentShape(Rectangle())
+                            }
+                            .buttonStyle(PlainButtonStyle())
+                            .alert("Recommended Moves Guide", isPresented: $showAnalysisLegend) {
+                                Button("Got it", role: .cancel) { }
+                            } message: {
+                                Text("KataGo evaluates and ranks moves by AI win rate:\n\n• 🔵 #1 (Blue): BEST — Top AI recommendation\n• 🟢 #2 (Green): 2nd — Strong alternative\n• 🟠 #3 (Amber): 3rd — Good alternative\n• 🟣 #4 & #5 (Purple): 4th/5th — Other viable options\n\nTap any badge on the board or pill above to preview and place that move.")
+                            }
+                        }
+                        .frame(height: 34)
+                        .padding(.horizontal, 14)
+                        .background(Color.white.opacity(0.08))
+                        .cornerRadius(10)
+                        
+                        // Recommended Candidate Moves Strip (Always 32pt height)
+                        if !analysis.candidates.isEmpty {
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 6) {
+                                    ForEach(analysis.candidates) { cand in
+                                        let isSelected = previewMove?.0 == cand.x && previewMove?.1 == cand.y
+                                        let rankLabel: String = {
+                                            switch cand.order {
+                                            case 1: return "BEST"
+                                            case 2: return "2nd"
+                                            case 3: return "3rd"
+                                            case 4: return "4th"
+                                            case 5: return "5th"
+                                            default: return "#\(cand.order)"
+                                            }
+                                        }()
+                                        
+                                        Button(action: {
+                                            handleTap(x: cand.x, y: cand.y)
+                                        }) {
+                                            HStack(spacing: 5) {
+                                                HStack(spacing: 3) {
+                                                    ZStack {
+                                                        Circle()
+                                                            .fill(candidateBadgeColor(for: cand.order))
+                                                            .frame(width: 18, height: 18)
+                                                        Text("\(cand.order)")
+                                                            .font(.system(size: 10, weight: .black, design: .rounded))
+                                                            .foregroundColor(.white)
+                                                    }
+                                                    Text(rankLabel)
+                                                        .font(.system(size: 10, weight: .heavy))
+                                                        .foregroundColor(candidateBadgeColor(for: cand.order))
+                                                }
+                                                
+                                                Rectangle()
+                                                    .fill(Color.white.opacity(0.2))
+                                                    .frame(width: 1, height: 12)
+                                                
+                                                Text(cand.gtpCoord)
+                                                    .font(.system(size: 11, weight: .bold, design: .monospaced))
+                                                    .foregroundColor(.white)
+                                                
+                                                Text("\(Int((cand.winrate * 100).rounded()))%")
+                                                    .font(.system(size: 11, weight: .heavy))
+                                                    .foregroundColor(accentColor)
+                                                
+                                                Text(String(format: "%@%+.1f", cand.scoreLead >= 0 ? "B" : "W", abs(cand.scoreLead)))
+                                                    .font(.system(size: 10, weight: .medium))
+                                                    .foregroundColor(.gray)
+                                            }
+                                            .padding(.horizontal, 8)
+                                            .padding(.vertical, 4)
+                                            .background(
+                                                RoundedRectangle(cornerRadius: 12)
+                                                    .fill(isSelected ? Color.white.opacity(0.2) : Color.white.opacity(0.06))
+                                            )
+                                            .overlay(
+                                                RoundedRectangle(cornerRadius: 12)
+                                                    .stroke(isSelected ? Color.yellow : Color.white.opacity(0.12), lineWidth: isSelected ? 1.5 : 0.8)
+                                            )
+                                        }
+                                        .buttonStyle(PlainButtonStyle())
+                                    }
+                                }
+                                .padding(.horizontal, 20)
+                            }
+                            .frame(height: 32)
+                        } else {
+                            HStack(spacing: 6) {
+                                ProgressView()
+                                    .progressViewStyle(CircularProgressViewStyle(tint: accentColor))
+                                    .scaleEffect(0.65)
+                                Text("KataGo evaluating moves...")
+                                    .font(.system(size: 11, weight: .medium))
+                                    .foregroundColor(.gray)
+                            }
+                            .frame(height: 32)
+                        }
+                    } else if let score = finalScore {
+                        VStack(spacing: 4) {
+                            Text("Game Over")
+                                .font(.system(size: 14, weight: .bold))
+                                .foregroundColor(.white)
+                            Text("Result: \(score)")
+                                .font(.system(size: 13, weight: .semibold))
+                                .foregroundColor(accentColor)
+                        }
+                        .frame(height: 74)
+                    } else {
+                        // Analysis Off: Static game status
+                        VStack(spacing: 4) {
+                            HStack(spacing: 12) {
+                                Text("Move \(moveHistory.count)")
+                                    .font(.system(size: 13, weight: .bold))
+                                    .foregroundColor(.white)
+                                Circle().fill(Color.gray.opacity(0.4)).frame(width: 4, height: 4)
+                                Text(currentTurn == .black ? "Black to play" : "White to play")
+                                    .font(.system(size: 13, weight: .medium))
+                                    .foregroundColor(.gray)
+                            }
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 6)
+                            .background(Color.white.opacity(0.06))
+                            .cornerRadius(10)
+                            
+                            Text("Tap 👁 to view KataGo AI recommendations")
+                                .font(.system(size: 11, weight: .regular))
+                                .foregroundColor(.gray.opacity(0.5))
+                        }
+                        .frame(height: 74)
                     }
                 }
-                .frame(height: 36)
-                .padding(.horizontal, 16)
-                .background(Color.white.opacity(0.08))
-                .cornerRadius(12)
-                .opacity(showAnalysis && finalScore == nil ? 1.0 : 0.0)
-                .frame(height: 36)
-                .padding(.bottom, 8)
-
-                Color.clear.frame(height: 8)
+                .frame(height: 74)
+                .padding(.bottom, 6)
 
                 // Only render the board once the engine is ready
                 if isEngineInitialized {
@@ -328,12 +468,13 @@ struct GameView: View {
     }
 
     private func executeMove(x: Int, y: Int) {
-        guard let engine = bridge, !isThinking, !isAnalyzing, finalScore == nil else { return }
+        guard let engine = bridge, !isThinking, finalScore == nil else { return }
         let turnColor = currentTurn
         let turnVal = turnColor.rawValue
         let coord = toGtpCoord(x: x, y: y)
         
         previewMove = nil
+        analysis.candidates = []
         isThinking = true
         
         DispatchQueue.global(qos: .userInitiated).async {
@@ -362,12 +503,13 @@ struct GameView: View {
     }
 
     private func handlePass() {
-        guard let engine = bridge, !isThinking, !isAnalyzing, finalScore == nil else { return }
+        guard let engine = bridge, !isThinking, finalScore == nil else { return }
         let turnColor = currentTurn
         let turnVal = turnColor.rawValue
         
         isThinking = true
         previewMove = nil
+        analysis.candidates = []
         
         DispatchQueue.global(qos: .userInitiated).async {
             let res = engine.sendGtpCommand("play \(turnColor == .black ? "black" : "white") pass")
@@ -519,6 +661,7 @@ struct GameView: View {
     private func triggerAnalysis() {
         guard let engine = bridge, isEngineInitialized, !isThinking, !isAnalyzing else { return }
         let turnColor = currentTurn
+        let currentHistoryCount = moveHistory.count
         isAnalyzing = true
         DispatchQueue.global(qos: .userInitiated).async {
             let analysisVisits = max(100, Int(Double(self.currentVisits) * 0.4))
@@ -528,6 +671,7 @@ struct GameView: View {
             var newWinrate: Double? = nil
             var newScoreLead: Double? = nil
             var newOwnership: [Double]? = nil
+            var newCandidates: [CandidateMove] = []
             if let response = res, response.hasPrefix("=") {
                 let jsonStr = response.replacingOccurrences(of: "= ", with: "").replacingOccurrences(of: "=", with: "").trimmingCharacters(in: .whitespacesAndNewlines)
                 if let data = jsonStr.data(using: .utf8),
@@ -541,13 +685,42 @@ struct GameView: View {
                     } else if let raw = json["ownership"] as? [Double] {
                         newOwnership = raw
                     }
+                    if let moveInfos = json["moveInfos"] as? [[String: Any]] {
+                        var parsed: [CandidateMove] = []
+                        var rank = 1
+                        for info in moveInfos {
+                            guard let moveStr = info["move"] as? String,
+                                  let (cx, cy) = CandidateMove.fromGtpCoord(moveStr) else { continue }
+                            let visits = info["visits"] as? Int ?? 0
+                            let blackWr = info["winrate"] as? Double ?? 0.5
+                            let blackLead = info["scoreLead"] as? Double ?? 0.0
+                            let displayWr = (turnColor == .black) ? blackWr : (1.0 - blackWr)
+                            let displayLead = (turnColor == .black) ? blackLead : -blackLead
+
+                            parsed.append(CandidateMove(
+                                x: cx,
+                                y: cy,
+                                winrate: displayWr,
+                                visits: visits,
+                                scoreLead: displayLead,
+                                order: rank
+                            ))
+                            rank += 1
+                            if parsed.count >= 5 { break }
+                        }
+                        newCandidates = parsed
+                    }
                 }
             }
             DispatchQueue.main.async {
                 self.isAnalyzing = false
+                guard self.showAnalysis, self.moveHistory.count == currentHistoryCount else { return }
                 if let wr = newWinrate { self.analysis.winrate = wr }
                 if let sl = newScoreLead { self.analysis.scoreLead = sl }
                 if let owner = newOwnership { self.analysis.ownership = owner }
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    self.analysis.candidates = newCandidates
+                }
             }
         }
     }
@@ -574,6 +747,7 @@ struct GameView: View {
                 if let owner = parsedOwnership {
                     self.analysis.ownership = owner
                 }
+                self.analysis.candidates = []
                 finalScore = res?.replacingOccurrences(of: "= ", with: "") ?? "Game Ended"
                 showGameOverDialog = true
             }
@@ -627,10 +801,8 @@ struct GameView: View {
     private func startNewGame(settings: GameSettings, visits: Int) {
         showNewGame = false
         showSettings = false
-        let rawBoard = getFixedHandicapStones(count: settings.handicap)
-        let initialMoves = rawBoard.map { PersistedMove(x: $0.0, y: $0.1, isPass: false, stone: 1) }
-        PersistedMove.saveAll(initialMoves)
-        restoreGame(settings: settings, moves: initialMoves)
+        PersistedMove.saveAll([])
+        restoreGame(settings: settings, moves: [])
     }
 
     private func restoreGame(settings: GameSettings, moves: [PersistedMove]) {
@@ -641,40 +813,46 @@ struct GameView: View {
             engine.sendGtpCommand("set_max_visits \(settings.visits)")
             engine.sendGtpCommand("komi \(settings.handicap > 0 ? 0.5 : 7.5)")
             if settings.handicap > 0 {
-                engine.sendGtpCommand("fixed_handicap \(settings.handicap)")
+                _ = engine.sendGtpCommand("fixed_handicap \(settings.handicap)")
             }
             
-            let handicapCount = settings.handicap
+            // Clean up any legacy persisted handicap stones from older versions
+            let gameMoves: [PersistedMove]
+            if settings.handicap > 0 && moves.count >= settings.handicap && moves.prefix(settings.handicap).allSatisfy({ $0.stone == 1 && !$0.isPass }) {
+                gameMoves = Array(moves.dropFirst(settings.handicap))
+            } else {
+                gameMoves = moves
+            }
+
             var board = Array(repeating: Array(repeating: Stone.empty, count: 19), count: 19)
+            for pt in self.getFixedHandicapStones(count: settings.handicap) {
+                board[pt.1][pt.0] = .black
+            }
+            
             var history: [PersistedMove] = []
             var last: (Int, Int)? = nil
             var passes = 0
             
-            for (index, move) in moves.enumerated() {
+            for move in gameMoves {
                 let stone = Stone(rawValue: move.stone) ?? .empty
-                if index < handicapCount {
+                let cmd = move.isPass ? "play \(move.stone == 1 ? "black" : "white") pass" : "play \(move.stone == 1 ? "black" : "white") \(toGtpCoord(x: move.x, y: move.y))"
+                _ = engine.sendGtpCommand(cmd)
+                
+                history.append(move)
+                if !move.isPass {
                     board[move.y][move.x] = stone
-                    history.append(move)
+                    last = (move.x, move.y)
+                    passes = 0
                 } else {
-                    let cmd = move.isPass ? "play \(move.stone == 1 ? "black" : "white") pass" : "play \(move.stone == 1 ? "black" : "white") \(toGtpCoord(x: move.x, y: move.y))"
-                    _ = engine.sendGtpCommand(cmd)
-                    
-                    history.append(move)
-                    if !move.isPass {
-                        board[move.y][move.x] = stone
-                        last = (move.x, move.y)
-                        passes = 0
-                    } else {
-                        passes += 1
-                    }
+                    passes += 1
                 }
             }
             
             let nextTurn: Stone
-            if moves.isEmpty {
+            if gameMoves.isEmpty {
                 nextTurn = settings.handicap > 0 ? .white : .black
             } else {
-                nextTurn = (moves.last?.stone == 1) ? .white : .black
+                nextTurn = (gameMoves.last?.stone == 1) ? .white : .black
             }
             
             DispatchQueue.main.async {
@@ -697,13 +875,18 @@ struct GameView: View {
     }
     
     private func getFixedHandicapStones(count: Int) -> [(Int, Int)] {
-        let pts = [(3,3), (15,15), (15,3), (3,15), (9,9), (3,9), (15,9), (9,3), (9,15)]
-        if count <= 0 { return [] }; if count == 1 { return [(15,3)] }
-        if count == 2 { return [(15,3), (3,15)] }; if count == 3 { return [(15,3), (3,15), (15,15)] }
-        if count == 4 { return [(15,3), (3,15), (15,15), (3,3)] }; if count == 5 { return [(15,3), (3,15), (15,15), (3,3), (9,9)] }
-        if count == 6 { return [(15,3), (3,15), (15,15), (3,3), (15,9), (3,9)] }; if count == 7 { return [(15,3), (3,15), (15,15), (3,3), (15,9), (3,9), (9,9)] }
-        if count == 8 { return [(15,3), (3,15), (15,15), (3,3), (15,9), (3,9), (9,3), (9,15)] }
-        return Array(pts.prefix(9))
+        switch count {
+        case 1: return [(15, 3)]
+        case 2: return [(3, 15), (15, 3)]
+        case 3: return [(3, 15), (15, 3), (3, 3)]
+        case 4: return [(3, 15), (15, 3), (3, 3), (15, 15)]
+        case 5: return [(3, 15), (15, 3), (3, 3), (15, 15), (9, 9)]
+        case 6: return [(3, 15), (15, 3), (3, 3), (15, 15), (3, 9), (15, 9)]
+        case 7: return [(3, 15), (15, 3), (3, 3), (15, 15), (3, 9), (15, 9), (9, 9)]
+        case 8: return [(3, 15), (15, 3), (3, 3), (15, 15), (3, 9), (15, 9), (9, 3), (9, 15)]
+        case 9: return [(3, 15), (15, 3), (3, 3), (15, 15), (3, 9), (15, 9), (9, 3), (9, 15), (9, 9)]
+        default: return []
+        }
     }
 
     private func undoMove() {
@@ -725,6 +908,7 @@ struct GameView: View {
         consecutivePasses = passes
         PersistedMove.saveAll(moveHistory)
         
+        analysis.candidates = []
         if showAnalysis { triggerAnalysis() }
     }
     
@@ -742,6 +926,7 @@ struct GameView: View {
                 SoundManager.shared.playStoneSound(withHaptic: true)
             }
             
+            analysis.candidates = []
             if showAnalysis { triggerAnalysis() }
         }
     }

@@ -668,6 +668,44 @@ public class MPSGraphModelHandle {
     }
 }
 
+private let _simulatorPatchOnce: Void = {
+    // 1. Protect __NSArrayM insertObject:atIndex: against nil objects (fixes Apple bug in iOS 26.2+ simulator)
+    if let arrayMClass = NSClassFromString("__NSArrayM") {
+        let sel = NSSelectorFromString("insertObject:atIndex:")
+        if let origMethod = class_getInstanceMethod(arrayMClass, sel) {
+            let origImp = method_getImplementation(origMethod)
+            typealias OrigFunc = @convention(c) (AnyObject, Selector, AnyObject, Int) -> Void
+            let origCallable = unsafeBitCast(origImp, to: OrigFunc.self)
+            
+            let block: @convention(block) (AnyObject, AnyObject?, Int) -> Void = { selfObj, anObject, index in
+                let safeObj: AnyObject = anObject ?? ("" as NSString)
+                origCallable(selfObj, sel, safeObj, index)
+            }
+            let newImp = imp_implementationWithBlock(block)
+            method_setImplementation(origMethod, newImp)
+        }
+    }
+    
+    // 2. Also patch MPSGraphDeviceDescriptor initWithMPSGraphDevice: if present
+    if let descriptorClass = NSClassFromString("MPSGraphDeviceDescriptor") {
+        let originalSelector = NSSelectorFromString("initWithMPSGraphDevice:")
+        let initMetalSelector = NSSelectorFromString("initMetalDeviceWithGPUCoreCount:architecture:")
+        if let originalMethod = class_getInstanceMethod(descriptorClass, originalSelector),
+           let initMetalMethod = class_getInstanceMethod(descriptorClass, initMetalSelector) {
+            typealias InitMetalFunc = @convention(c) (AnyObject, Selector, Int64, NSString) -> Unmanaged<AnyObject>
+            let initMetalImp = method_getImplementation(initMetalMethod)
+            let initMetalCallable = unsafeBitCast(initMetalImp, to: InitMetalFunc.self)
+            
+            let block: @convention(block) (AnyObject, AnyObject) -> AnyObject = { selfObj, device in
+                return initMetalCallable(selfObj, initMetalSelector, -1, "applegpu" as NSString).takeRetainedValue()
+            }
+            let newImp = imp_implementationWithBlock(block)
+            method_setImplementation(originalMethod, newImp)
+        }
+    }
+    printError("Metal backend: Applied simulator compatibility patches for iOS 26.2+")
+}()
+
 /// Create a GPU-only compute handle using MPSGraph
 public func createMPSGraphOnlyHandle(
     modelDesc: SWModelDesc,
@@ -675,6 +713,8 @@ public func createMPSGraphOnlyHandle(
     requireExactNNLen: Bool,
     context: MetalComputeContext
 ) -> MPSGraphModelHandle? {
+    _ = _simulatorPatchOnce
+
     guard let mpsGraphHandle = MPSGraphModelHandle(
         modelDesc: modelDesc,
         nnXLen: context.nnXLen,
@@ -688,3 +728,4 @@ public func createMPSGraphOnlyHandle(
     printError("Metal backend \(serverThreadIdx): Initialized MPSGraph GPU-only mode")
     return mpsGraphHandle
 }
+

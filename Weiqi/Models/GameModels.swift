@@ -69,11 +69,32 @@ extension GameSettings {
     }
 }
 
-struct CandidateMove {
+struct CandidateMove: Identifiable {
+    var id: String { "\(x),\(y)" }
     let x: Int
     let y: Int
     let winrate: Double
     let visits: Int
+    var scoreLead: Double = 0.0
+    var order: Int = 1
+    
+    var gtpCoord: String {
+        let letters = "ABCDEFGHJKLMNOPQRST"
+        guard x >= 0 && x < letters.count else { return "" }
+        return "\(Array(letters)[x])\(19 - y)"
+    }
+    
+    static func fromGtpCoord(_ coord: String) -> (Int, Int)? {
+        let coord = coord.uppercased()
+        guard coord.count >= 2, coord != "PASS" else { return nil }
+        let letters = "ABCDEFGHJKLMNOPQRST"
+        guard let firstChar = coord.first, let col = letters.firstIndex(of: firstChar) else { return nil }
+        guard let rowNum = Int(coord.dropFirst()) else { return nil }
+        let x = letters.distance(from: letters.startIndex, to: col)
+        let y = 19 - rowNum
+        guard x >= 0 && x < 19 && y >= 0 && y < 19 else { return nil }
+        return (x, y)
+    }
 }
 
 struct AnalysisResult {
