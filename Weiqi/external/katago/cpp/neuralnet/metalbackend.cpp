@@ -26,6 +26,7 @@ namespace gfs = ghc::filesystem;
 
 namespace CoreMLConversion {
 
+#ifdef USE_KATAGO_COREML
 // Get temp directory for model conversion
 static string getTempDirectory() {
   gfs::path tempDir = gfs::temp_directory_path() / "katago_coreml";
@@ -66,7 +67,6 @@ static string convertModelToTemp(
   string tempPath = generateTempPath(serverThreadIdx);
   cerr << "Metal backend " << serverThreadIdx << ": Converting model to " << tempPath << endl;
 
-#ifdef USE_KATAGO_COREML
   katagocoreml::ConversionOptions opts;
   opts.board_x_size = boardX;
   opts.board_y_size = boardY;
@@ -88,13 +88,30 @@ static string convertModelToTemp(
     }
     throw runtime_error(string("Metal backend ") + to_string(serverThreadIdx) + ": Core ML model conversion failed: " + e.what());
   }
-#else
-  throw runtime_error("Metal backend: CoreML ANE mode is not supported in this build (compiled without katagocoreml)");
-#endif
 
   cerr << "Metal backend " << serverThreadIdx << ": Conversion completed" << endl;
   return tempPath;
 }
+#else
+static string convertModelToTemp(
+  const string& modelPath,
+  int boardX,
+  int boardY,
+  bool useFP16,
+  bool optimizeMask,
+  int maxBatchSize,
+  int serverThreadIdx
+) {
+  (void)modelPath;
+  (void)boardX;
+  (void)boardY;
+  (void)useFP16;
+  (void)optimizeMask;
+  (void)maxBatchSize;
+  (void)serverThreadIdx;
+  throw runtime_error("Metal backend: CoreML ANE mode is not supported in this build (compiled without katagocoreml)");
+}
+#endif
 
 }  // namespace CoreMLConversion
 
