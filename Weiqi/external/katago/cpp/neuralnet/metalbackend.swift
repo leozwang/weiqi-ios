@@ -703,6 +703,19 @@ private let _simulatorPatchOnce: Void = {
             method_setImplementation(originalMethod, newImp)
         }
     }
+    // 3. Protect MTLDebugDevice newResidencySetWithDescriptor:error: against assertion failures
+    // in iOS simulator with Metal API validation enabled (MPSGraph queries residency sets on simulator GPU)
+    if let debugDeviceClass = NSClassFromString("MTLDebugDevice") {
+        let sel = NSSelectorFromString("newResidencySetWithDescriptor:error:")
+        if let method = class_getInstanceMethod(debugDeviceClass, sel) {
+            let block: @convention(block) (AnyObject, AnyObject?, UnsafeMutablePointer<AnyObject?>?) -> AnyObject? = { selfObj, desc, errorPtr in
+                return nil
+            }
+            let newImp = imp_implementationWithBlock(block)
+            method_setImplementation(method, newImp)
+        }
+    }
+
     printError("Metal backend: Applied simulator compatibility patches for iOS 26.2+")
 }()
 

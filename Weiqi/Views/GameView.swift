@@ -952,8 +952,8 @@ struct SettingsView: View {
     @ObservedObject private var soundManager = SoundManager.shared
 
     private var appVersion: String {
-        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.13"
-        let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "14"
+        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.14"
+        let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "15"
         return "\(version) (\(build))"
     }
 
@@ -1003,6 +1003,7 @@ struct SettingsView: View {
                 presentationMode.wrappedValue.dismiss()
             })
         }
+        .navigationViewStyle(StackNavigationViewStyle())
     }
 }
 
@@ -1181,6 +1182,7 @@ struct NewGameView: View {
             .navigationTitle(LocalizedStringKey("New Game"))
             .navigationBarItems(trailing: Button(LocalizedStringKey("Cancel")) { presentationMode.wrappedValue.dismiss() })
         }
+        .navigationViewStyle(StackNavigationViewStyle())
     }
 }
 

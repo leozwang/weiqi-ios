@@ -14,6 +14,7 @@ targets:
       PRODUCT_MODULE_NAME: KataGoSwift
       SWIFT_CXX_INTEROPERABILITY_MODE: default
       DEFINES_MODULE: YES
+      ENABLE_USER_SCRIPT_SANDBOXING: NO
     frameworks:
       - MetalPerformanceShaders
       - MetalPerformanceShadersGraph
@@ -54,10 +55,11 @@ targets:
       INFOPLIST_FILE: Weiqi/Info.plist
       PRODUCT_BUNDLE_IDENTIFIER: com.cwave.weiqi
       ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
-      CURRENT_PROJECT_VERSION: "14"
-      MARKETING_VERSION: "1.13"
+      CURRENT_PROJECT_VERSION: "15"
+      MARKETING_VERSION: "1.14"
       SWIFT_OBJC_BRIDGING_HEADER: Weiqi/Weiqi-Bridging-Header.h
       SWIFT_USE_EXPLICIT_MODULE_BUILD: NO
+      ENABLE_USER_SCRIPT_SANDBOXING: NO
       OTHER_LDFLAGS: "-lz"
       OTHER_CPLUSPLUSFLAGS: >
         -std=c++20 -DUSE_METAL_BACKEND -DNO_GIT_REVISION -DNO_LIBZIP
