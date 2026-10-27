@@ -48,6 +48,9 @@ You can test the entire purchase flow, including success, pending states, and fa
 - It lists `com.cwave.weiqi.unlock_levels` as a Non-Consumable product.
 
 ### How to Enable Local StoreKit Testing:
+This is already set up: `project.yml` attaches `Weiqi/Products.storekit` to the **Run** action of the
+**Weiqi** scheme (`storeKitConfiguration`), and `xcodegen generate` writes it into the scheme. To check
+or change it by hand:
 1. Open the project in Xcode.
 2. Click on the scheme selector in the top toolbar (currently labeled **Weiqi**) and select **Edit Scheme...** (or press `CMD + <`).
 3. Select the **Run** action on the left sidebar.
@@ -55,6 +58,10 @@ You can test the entire purchase flow, including success, pending states, and fa
 5. Locate the **StoreKit Configuration** dropdown.
 6. Select **Products.storekit** from the list.
 7. Click **Close**.
+
+The `.storekit` file is not copied into the app; it is only a resource of the `WeiqiTests` target, where
+`StoreTests` uses it with `SKTestSession` to test purchase, refund, restore and Ask to Buy automatically
+(see README > Testing).
 
 Now, when you run the app on the simulator, StoreKit will mock App Store network calls locally using the product configurations defined in `Products.storekit`.
 

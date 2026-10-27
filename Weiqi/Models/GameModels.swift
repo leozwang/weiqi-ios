@@ -132,3 +132,29 @@ extension PersistedMove {
         UserDefaults.standard.removeObject(forKey: userDefaultsKey)
     }
 }
+
+/// Result of the finished game, so reopening it shows the same result without scoring again.
+struct PersistedResult: Codable {
+    /// Number of moves (including passes) when the game ended; the result only applies to that record.
+    let moveCount: Int
+    let result: String
+}
+
+extension PersistedResult {
+    static let userDefaultsKey = "com.cwave.weiqi.final_result"
+
+    static func load() -> PersistedResult? {
+        guard let data = UserDefaults.standard.data(forKey: userDefaultsKey) else { return nil }
+        return try? JSONDecoder().decode(PersistedResult.self, from: data)
+    }
+
+    func save() {
+        if let data = try? JSONEncoder().encode(self) {
+            UserDefaults.standard.set(data, forKey: Self.userDefaultsKey)
+        }
+    }
+
+    static func clear() {
+        UserDefaults.standard.removeObject(forKey: userDefaultsKey)
+    }
+}

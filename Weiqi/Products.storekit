@@ -5,7 +5,7 @@
   ],
   "products" : [
     {
-      "displayVersion" : 1,
+      "displayPrice" : "1.99",
       "familyShareable" : true,
       "internalID" : "C7E9D18A",
       "localizations" : [
@@ -31,36 +31,7 @@
     }
   ],
   "settings" : {
-    "_failTransactionsEnabled" : false,
-    "_locale" : "en_US",
-    "_storefront" : "USA",
-    "_storeKitErrors" : [
-      {
-        "current" : null,
-        "enabled" : false,
-        "name" : "Load Products"
-      },
-      {
-        "current" : null,
-        "enabled" : false,
-        "name" : "Purchase"
-      },
-      {
-        "current" : null,
-        "enabled" : false,
-        "name" : "Refund Request"
-      },
-      {
-        "current" : null,
-        "enabled" : false,
-        "name" : "Subscription Status"
-      },
-      {
-        "current" : null,
-        "enabled" : false,
-        "name" : "Verification"
-      }
-    ]
+
   },
   "subscriptionGroups" : [
 

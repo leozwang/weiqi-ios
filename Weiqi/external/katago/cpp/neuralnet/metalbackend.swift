@@ -570,101 +570,107 @@ public class MPSGraphModelHandle {
         ownership: UnsafeMutablePointer<Float32>,
         batchSize: Int
     ) {
-        let channelAxis = InputShape.getChannelAxis()
-        let numInputChannelsNS = input.shape[channelAxis]
-        let numInputGlobalChannelsNS = inputGlobal.shape[channelAxis]
-        let numInputMetaChannelsNS = inputMeta.shape[channelAxis]
-        let nnXLenNS = nnXLen as NSNumber
-        let nnYLenNS = nnYLen as NSNumber
+        // KataGo calls this from its NN server threads, which have no autorelease pool of their own.
+        // Without one, the autoreleased command buffer, input arrays and results of every batch stay
+        // alive until the thread exits, so memory grew with every evaluation (about 20 MB per move
+        // at 500 visits). The CoreML path above drains a pool per inference in the same way.
+        autoreleasepool {
+            let channelAxis = InputShape.getChannelAxis()
+            let numInputChannelsNS = input.shape[channelAxis]
+            let numInputGlobalChannelsNS = inputGlobal.shape[channelAxis]
+            let numInputMetaChannelsNS = inputMeta.shape[channelAxis]
+            let nnXLenNS = nnXLen as NSNumber
+            let nnYLenNS = nnYLen as NSNumber
 
-        // Mask strides describe the source (input) memory layout for extracting channel 0.
-        var maskStrideArray = [
-            MemoryLayout<Float32>.size,
-            Int(nnXLen) * MemoryLayout<Float32>.size,
-            Int(nnYLen) * Int(nnXLen) * MemoryLayout<Float32>.size,
-            numInputChannels * Int(nnYLen) * Int(nnXLen) * MemoryLayout<Float32>.size,
-        ]
+            // Mask strides describe the source (input) memory layout for extracting channel 0.
+            var maskStrideArray = [
+                MemoryLayout<Float32>.size,
+                Int(nnXLen) * MemoryLayout<Float32>.size,
+                Int(nnYLen) * Int(nnXLen) * MemoryLayout<Float32>.size,
+                numInputChannels * Int(nnYLen) * Int(nnXLen) * MemoryLayout<Float32>.size,
+            ]
 
-        guard let mtlCommandBuffer = commandQueue.makeCommandBuffer() else {
-            fatalError("Metal backend: Failed to create command buffer")
-        }
-        let commandBuffer = MPSCommandBuffer(commandBuffer: mtlCommandBuffer)
-
-        // Spatial input
-        let inputShape = InputShape.create(
-            batchSize: batchSize as NSNumber,
-            numChannels: numInputChannelsNS,
-            nnYLen: nnYLenNS,
-            nnXLen: nnXLenNS)
-        let inputDescriptor = MPSNDArrayDescriptor(dataType: input.tensor.dataType, shape: inputShape)
-        let inputArray = MPSNDArray(device: device, descriptor: inputDescriptor)
-        inputArray.writeBytes(inputPointer)
-
-        // Global input
-        let inputGlobalShape = InputShape.create(
-            batchSize: batchSize as NSNumber,
-            numChannels: numInputGlobalChannelsNS,
-            nnYLen: 1,
-            nnXLen: 1)
-        let inputGlobalDescriptor = MPSNDArrayDescriptor(dataType: inputGlobal.tensor.dataType, shape: inputGlobalShape)
-        let inputGlobalArray = MPSNDArray(device: device, descriptor: inputGlobalDescriptor)
-        inputGlobalArray.writeBytes(inputGlobalPointer)
-
-        // Meta input
-        let inputMetaShape = InputShape.create(
-            batchSize: batchSize as NSNumber,
-            numChannels: numInputMetaChannelsNS,
-            nnYLen: 1,
-            nnXLen: 1)
-        let inputMetaDescriptor = MPSNDArrayDescriptor(dataType: inputMeta.tensor.dataType, shape: inputMetaShape)
-        let inputMetaArray = MPSNDArray(device: device, descriptor: inputMetaDescriptor)
-        inputMetaArray.writeBytes(inputMetaPointer)
-
-        // Mask (extracted from first channel of spatial input)
-        let maskShape = InputShape.create(
-            batchSize: batchSize as NSNumber,
-            numChannels: 1,
-            nnYLen: nnYLenNS,
-            nnXLen: nnXLenNS)
-        let maskDescriptor = MPSNDArrayDescriptor(dataType: mask.tensor.dataType, shape: maskShape)
-        let maskArray = MPSNDArray(device: device, descriptor: maskDescriptor)
-        maskArray.writeBytes(inputPointer, strideBytes: &maskStrideArray)
-
-        let feeds = [
-            input.tensor: MPSGraphTensorData(inputArray),
-            inputGlobal.tensor: MPSGraphTensorData(inputGlobalArray),
-            inputMeta.tensor: MPSGraphTensorData(inputMetaArray),
-            mask.tensor: MPSGraphTensorData(maskArray),
-        ]
-
-        let fetch = graph.encode(
-            to: commandBuffer,
-            feeds: feeds,
-            targetTensors: targetTensors,
-            targetOperations: nil,
-            executionDescriptor: nil)
-
-        commandBuffer.commit()
-        commandBuffer.waitUntilCompleted()
-
-        if let error = commandBuffer.error {
-            fatalError("Metal backend: GPU error: \(error)")
-        }
-
-        // Copy results into output buffers. Fail loud if any expected output
-        // tensor is missing from the graph result: a silent skip would leave
-        // the caller's buffer uninitialized and search would consume garbage.
-        func readOrDie(_ tensor: MPSGraphTensor, _ dest: UnsafeMutableRawPointer, _ name: String) {
-            guard let result = fetch[tensor] else {
-                fatalError("Metal backend: MPSGraph fetch missing expected output tensor: \(name)")
+            guard let mtlCommandBuffer = commandQueue.makeCommandBuffer() else {
+                fatalError("Metal backend: Failed to create command buffer")
             }
-            result.mpsndarray().readBytes(dest)
+            let commandBuffer = MPSCommandBuffer(commandBuffer: mtlCommandBuffer)
+
+            // Spatial input
+            let inputShape = InputShape.create(
+                batchSize: batchSize as NSNumber,
+                numChannels: numInputChannelsNS,
+                nnYLen: nnYLenNS,
+                nnXLen: nnXLenNS)
+            let inputDescriptor = MPSNDArrayDescriptor(dataType: input.tensor.dataType, shape: inputShape)
+            let inputArray = MPSNDArray(device: device, descriptor: inputDescriptor)
+            inputArray.writeBytes(inputPointer)
+
+            // Global input
+            let inputGlobalShape = InputShape.create(
+                batchSize: batchSize as NSNumber,
+                numChannels: numInputGlobalChannelsNS,
+                nnYLen: 1,
+                nnXLen: 1)
+            let inputGlobalDescriptor = MPSNDArrayDescriptor(dataType: inputGlobal.tensor.dataType, shape: inputGlobalShape)
+            let inputGlobalArray = MPSNDArray(device: device, descriptor: inputGlobalDescriptor)
+            inputGlobalArray.writeBytes(inputGlobalPointer)
+
+            // Meta input
+            let inputMetaShape = InputShape.create(
+                batchSize: batchSize as NSNumber,
+                numChannels: numInputMetaChannelsNS,
+                nnYLen: 1,
+                nnXLen: 1)
+            let inputMetaDescriptor = MPSNDArrayDescriptor(dataType: inputMeta.tensor.dataType, shape: inputMetaShape)
+            let inputMetaArray = MPSNDArray(device: device, descriptor: inputMetaDescriptor)
+            inputMetaArray.writeBytes(inputMetaPointer)
+
+            // Mask (extracted from first channel of spatial input)
+            let maskShape = InputShape.create(
+                batchSize: batchSize as NSNumber,
+                numChannels: 1,
+                nnYLen: nnYLenNS,
+                nnXLen: nnXLenNS)
+            let maskDescriptor = MPSNDArrayDescriptor(dataType: mask.tensor.dataType, shape: maskShape)
+            let maskArray = MPSNDArray(device: device, descriptor: maskDescriptor)
+            maskArray.writeBytes(inputPointer, strideBytes: &maskStrideArray)
+
+            let feeds = [
+                input.tensor: MPSGraphTensorData(inputArray),
+                inputGlobal.tensor: MPSGraphTensorData(inputGlobalArray),
+                inputMeta.tensor: MPSGraphTensorData(inputMetaArray),
+                mask.tensor: MPSGraphTensorData(maskArray),
+            ]
+
+            let fetch = graph.encode(
+                to: commandBuffer,
+                feeds: feeds,
+                targetTensors: targetTensors,
+                targetOperations: nil,
+                executionDescriptor: nil)
+
+            commandBuffer.commit()
+            commandBuffer.waitUntilCompleted()
+
+            if let error = commandBuffer.error {
+                fatalError("Metal backend: GPU error: \(error)")
+            }
+
+            // Copy results into output buffers. Fail loud if any expected output
+            // tensor is missing from the graph result: a silent skip would leave
+            // the caller's buffer uninitialized and search would consume garbage.
+            func readOrDie(_ tensor: MPSGraphTensor, _ dest: UnsafeMutableRawPointer, _ name: String) {
+                guard let result = fetch[tensor] else {
+                    fatalError("Metal backend: MPSGraph fetch missing expected output tensor: \(name)")
+                }
+                result.mpsndarray().readBytes(dest)
+            }
+            readOrDie(policyHead.policyTensor, policy, "policy")
+            readOrDie(policyHead.policyPassTensor, policyPass, "policyPass")
+            readOrDie(valueHead.valueTensor, value, "value")
+            readOrDie(valueHead.scoreValueTensor, scoreValue, "scoreValue")
+            readOrDie(valueHead.ownershipTensor, ownership, "ownership")
         }
-        readOrDie(policyHead.policyTensor, policy, "policy")
-        readOrDie(policyHead.policyPassTensor, policyPass, "policyPass")
-        readOrDie(valueHead.valueTensor, value, "value")
-        readOrDie(valueHead.scoreValueTensor, scoreValue, "scoreValue")
-        readOrDie(valueHead.ownershipTensor, ownership, "ownership")
     }
 }
 

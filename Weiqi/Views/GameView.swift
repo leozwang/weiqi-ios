@@ -15,6 +15,8 @@ struct GameView: View {
     @State private var isEngineInitialized = false
     @State private var initError: String? = nil
     @State private var finalScore: String? = nil
+    /// True while the final score is being computed (can take several seconds).
+    @State private var isScoring = false
     @State private var showGameOverDialog = false
     @State private var showSettings = false
     @State private var showNewGame = false
@@ -27,11 +29,26 @@ struct GameView: View {
     
     @State private var pendingSettings = GameSettings()
     @State private var currentVisits: Int = 500
+    /// Strength picked in the New Game sheet; only becomes `currentVisits` when a game is started.
+    @State private var pendingVisits: Int = 500
+    /// Bumped whenever a game is (re)started; results of engine work for an older game are dropped.
+    @State private var gameGeneration = 0
     @State private var showPassAlert = false
     @State private var passAlertMessage = ""
     @State private var blackCaptures: Int = 0
     @State private var whiteCaptures: Int = 0
     @State private var showAnalysisLegend = false
+    /// Handicap of the current game (for the Debug-only engine status read by UI tests).
+    @State private var currentHandicap = 0
+    /// Moves replayed into the engine when the current game was loaded (for the engine status).
+    @State private var restoredMoves = 0
+    /// Debug builds only: "visits=… komi=… handicap=… restored=… mem=… refused=…", read by UI tests
+    /// (like Android's logcat checks).
+    @State private var engineStatus = ""
+
+    /// All engine work runs on one serial queue, so multi-command sequences (new game, undo, redo)
+    /// never interleave with an in-flight AI move or analysis.
+    private static let engineQueue = DispatchQueue(label: "com.cwave.weiqi.engine", qos: .userInitiated)
 
     private let backgroundColor = Color(red: 24/255, green: 24/255, blue: 28/255)
     private let accentColor = Color(red: 100/255, green: 200/255, blue: 255/255)
@@ -49,6 +66,7 @@ struct GameView: View {
                             .foregroundColor(.white)
                             .frame(width: 44, height: 44)
                     }
+                    .accessibilityLabel(Text("Settings"))
                     Spacer()
                     Text(finalScore ?? "围棋 碁 GO!")
                         .font(.system(size: 18, weight: .black))
@@ -68,6 +86,9 @@ struct GameView: View {
                             .foregroundColor(showAnalysis ? accentColor : .white)
                             .frame(width: 44, height: 44)
                     }
+                    .accessibilityLabel(Text("Analysis"))
+                    .accessibilityValue(Text(showAnalysis ? "On" : "Off"))
+                    .accessibilityIdentifier("analysisToggle")
                 }
                 .frame(height: 44)
                 .padding(.horizontal, 24)
@@ -124,7 +145,17 @@ struct GameView: View {
                 
                 // MARK: Fixed-Height Status & Analysis Container (Eliminates Board Shifting)
                 VStack(spacing: 4) {
-                    if showAnalysis && finalScore == nil {
+                    if isScoring {
+                        HStack(spacing: 8) {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle(tint: accentColor))
+                                .scaleEffect(0.8)
+                            Text(LocalizedStringKey("Counting score…"))
+                                .font(.system(size: 14, weight: .bold))
+                                .foregroundColor(.white)
+                        }
+                        .frame(height: 74)
+                    } else if showAnalysis && finalScore == nil {
                         // AI Winrate & Score Lead Row
                         HStack(spacing: 12) {
                             HStack(spacing: 6) {
@@ -195,7 +226,7 @@ struct GameView: View {
                                                             .font(.system(size: 10, weight: .black, design: .rounded))
                                                             .foregroundColor(.white)
                                                     }
-                                                    Text(rankLabel)
+                                                    Text(LocalizedStringKey(rankLabel))
                                                         .font(.system(size: 10, weight: .heavy))
                                                         .foregroundColor(candidateBadgeColor(for: cand.order))
                                                 }
@@ -262,7 +293,7 @@ struct GameView: View {
                                     .font(.system(size: 13, weight: .bold))
                                     .foregroundColor(.white)
                                 Circle().fill(Color.gray.opacity(0.4)).frame(width: 4, height: 4)
-                                Text(currentTurn == .black ? "Black to play" : "White to play")
+                                Text(LocalizedStringKey(currentTurn == .black ? "Black to play" : "White to play"))
                                     .font(.system(size: 13, weight: .medium))
                                     .foregroundColor(.gray)
                             }
@@ -339,11 +370,11 @@ struct GameView: View {
 
                 // Navigation Row: Undo - PASS (Skip) - Redo
                 HStack(spacing: 0) {
-                    ActionButton(icon: "arrow.uturn.backward", title: "Undo", action: undoMove).disabled(moveHistory.isEmpty || isThinking)
+                    ActionButton(icon: "arrow.uturn.backward", title: "Undo", action: undoMove).disabled(movesToUndo == 0 || isThinking)
                     Spacer()
-                    ActionButton(icon: "slash.circle", title: "Pass", action: handlePass).disabled(gameMode == .aiBoth || isThinking || finalScore != nil)
+                    ActionButton(icon: "slash.circle", title: "Pass", action: handlePass).disabled(!isUserTurn || isThinking || finalScore != nil)
                     Spacer()
-                    ActionButton(icon: "arrow.uturn.forward", title: "Redo", action: redoMove).disabled(redoStack.isEmpty || isThinking)
+                    ActionButton(icon: "arrow.uturn.forward", title: "Redo", action: redoMove).disabled(redoStack.isEmpty || isThinking || gameMode == .aiBoth)
                 }
                 .padding(.horizontal, 40)
 
@@ -355,14 +386,15 @@ struct GameView: View {
                         HStack { Image(systemName: "plus.circle.fill"); Text("NEW GAME") }.font(.system(size: 14, weight: .bold)).foregroundColor(.white).frame(width: 130, height: 64)
                             .background(RoundedRectangle(cornerRadius: 32).fill(Color.orange)).shadow(color: Color.orange.opacity(0.3), radius: 6, y: 3)
                     }
-                    .disabled(isThinking)
+                    .accessibilityIdentifier("newGame")
+                    // Always available (also during AI vs AI); results for the old game are discarded.
 
                     Button(action: { if let move = previewMove { executeMove(x: move.0, y: move.1) } }) {
                         Text("PLACE").font(.system(size: 20, weight: .black)).tracking(2).foregroundColor(.white).frame(maxWidth: .infinity).frame(height: 64)
                             .background(RoundedRectangle(cornerRadius: 32).fill(previewMove != nil ? Color(red: 30/255, green: 130/255, blue: 240/255) : Color.gray.opacity(0.3)))
                             .shadow(color: previewMove != nil ? Color(red: 30/255, green: 130/255, blue: 240/255).opacity(0.4) : .clear, radius: 8, y: 4)
                     }
-                    .disabled(previewMove == nil || isThinking || finalScore != nil)
+                    .disabled(previewMove == nil || isThinking || finalScore != nil || !isUserTurn)
                 }
                 .padding(.horizontal, 20).padding(.bottom, 30)
             }
@@ -396,12 +428,32 @@ struct GameView: View {
                     .transition(.opacity)
                     .zIndex(100)
             }
+            #if DEBUG
+            // Invisible, Debug builds only: lets UI tests check what the engine received.
+            Text(engineStatus)
+                .font(.system(size: 1))
+                .foregroundColor(backgroundColor)
+                .frame(width: 1, height: 1)
+                .accessibilityIdentifier("engineStatus")
+            #endif
         }
         .preferredColorScheme(.dark)
         .onAppear {
+            // When the app only hosts the engine unit tests (WeiqiTests), those tests drive the
+            // shared KataGo engine directly; keep the game UI idle so it cannot interfere.
+            if ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil { return }
+            #if DEBUG
+            // UI tests can start from a first launch (no saved settings, game or result).
+            if ProcessInfo.processInfo.environment["WEIQI_UITEST_RESET"] == "1" {
+                UserDefaults.standard.removeObject(forKey: GameSettings.userDefaultsKey)
+                PersistedMove.clear()
+                PersistedResult.clear()
+            }
+            #endif
             let saved = GameSettings.load()
             pendingSettings = saved
             currentVisits = saved.visits
+            pendingVisits = saved.visits
             // Initialize engine immediately in background while splash screen is displayed
             initializeEngine()
             // Keep splash screen visible for a minimum of 1.4s for smooth visual transition
@@ -418,16 +470,16 @@ struct GameView: View {
             SettingsView()
         }
         .sheet(isPresented: $showNewGame) {
-            NewGameView(settings: $pendingSettings, visits: $currentVisits) {
+            NewGameView(settings: $pendingSettings, visits: $pendingVisits) {
                 showNewGame = false
-                pendingSettings.visits = currentVisits
+                pendingSettings.visits = pendingVisits
                 pendingSettings.save()
-                startNewGame(settings: pendingSettings, visits: currentVisits)
+                startNewGame(settings: pendingSettings, visits: pendingVisits)
             }
             .onAppear {
                 let saved = GameSettings.load()
                 pendingSettings = saved
-                currentVisits = saved.visits
+                pendingVisits = saved.visits
             }
         }
         .alert("Game Over", isPresented: $showGameOverDialog) {
@@ -436,55 +488,156 @@ struct GameView: View {
         } message: { Text("Result: \(finalScore ?? "Unknown")") }
     }
 
-    private func handleTap(x: Int, y: Int) {
-        guard isEngineInitialized, !isThinking, finalScore == nil else { return }
-        let isUserTurn = gameMode == .userBoth || (gameMode == .userBlack && currentTurn == .black) || (gameMode == .userWhite && currentTurn == .white)
-        guard isUserTurn, boardState[y][x] == .empty else { return }
-        previewMove = (x, y)
-    }
+    // MARK: - Turn ownership
 
-    private func syncBoardFromEngine() {
-        guard let engine = bridge else { return }
-        if let res = engine.sendGtpCommand("get_board"), res.hasPrefix("=") {
-            let content = res.replacingOccurrences(of: "= ", with: "").trimmingCharacters(in: .whitespacesAndNewlines)
-            let tokens = content.components(separatedBy: " ")
-            if let gridStr = tokens.first, gridStr.count >= 361 {
-                var newBoard = Array(repeating: Array(repeating: Stone.empty, count: 19), count: 19)
-                let chars = Array(gridStr)
-                for y in 0..<19 {
-                    for x in 0..<19 {
-                        let c = chars[y * 19 + x]
-                        if c == "1" { newBoard[y][x] = .black }
-                        else if c == "2" { newBoard[y][x] = .white }
-                    }
-                }
-                self.boardState = newBoard
-            }
-            if tokens.count >= 3 {
-                self.blackCaptures = Int(tokens[1]) ?? 0
-                self.whiteCaptures = Int(tokens[2]) ?? 0
-            }
+    /// True when `color` is played by the person holding the device.
+    private func isHumanColor(_ color: Stone) -> Bool {
+        switch gameMode {
+        case .userBoth: return true
+        case .aiBoth: return false
+        case .userBlack: return color == .black
+        case .userWhite: return color == .white
         }
     }
 
+    private var isUserTurn: Bool { isHumanColor(currentTurn) }
+
+    /// Moves taken back by Undo. Against KataGo, Undo returns to your last decision (your move and
+    /// KataGo's reply) so it is your turn again; it is unavailable until you have made a move.
+    private var movesToUndo: Int {
+        switch gameMode {
+        case .aiBoth:
+            return 0
+        case .userBoth:
+            return moveHistory.isEmpty ? 0 : 1
+        case .userBlack, .userWhite:
+            guard let lastHumanMove = moveHistory.lastIndex(where: { isHumanColor(Stone(rawValue: $0.stone) ?? .empty) }) else { return 0 }
+            return moveHistory.count - lastHumanMove
+        }
+    }
+
+    private func handleTap(x: Int, y: Int) {
+        guard isEngineInitialized, !isThinking, finalScore == nil, isUserTurn, boardState[y][x] == .empty else { return }
+        previewMove = (x, y)
+    }
+
+    // MARK: - Engine state
+
+    /// Board, captures and side to move as reported by the engine, which is the source of truth.
+    private struct EngineSnapshot {
+        let board: [[Stone]]
+        let blackCaptures: Int
+        let whiteCaptures: Int
+        let toMove: Stone?
+    }
+
+    /// Reads the engine position. Call on `engineQueue`.
+    private static func readSnapshot(_ engine: KataGoWrapper) -> EngineSnapshot? {
+        guard let res = engine.sendGtpCommand("get_board"), res.hasPrefix("=") else { return nil }
+        let tokens = res.dropFirst().split(separator: " ").map(String.init)
+        guard let gridStr = tokens.first, gridStr.count >= 361 else { return nil }
+        var newBoard = Array(repeating: Array(repeating: Stone.empty, count: 19), count: 19)
+        let chars = Array(gridStr)
+        for y in 0..<19 {
+            for x in 0..<19 {
+                let c = chars[y * 19 + x]
+                if c == "1" { newBoard[y][x] = .black }
+                else if c == "2" { newBoard[y][x] = .white }
+            }
+        }
+        let toMove: Stone? = tokens.count >= 4 ? (tokens[3] == "W" ? .white : (tokens[3] == "B" ? .black : nil)) : nil
+        return EngineSnapshot(
+            board: newBoard,
+            blackCaptures: tokens.count >= 3 ? Int(tokens[1]) ?? 0 : 0,
+            whiteCaptures: tokens.count >= 3 ? Int(tokens[2]) ?? 0 : 0,
+            toMove: toMove
+        )
+    }
+
+    private func apply(_ snapshot: EngineSnapshot?) {
+        refreshEngineStatus()
+        guard let snapshot = snapshot else { return }
+        boardState = snapshot.board
+        blackCaptures = snapshot.blackCaptures
+        whiteCaptures = snapshot.whiteCaptures
+        if let toMove = snapshot.toMove { currentTurn = toMove }
+    }
+
+    /// Debug builds only: publishes the engine's search limit, komi, the moves replayed when the game
+    /// was loaded, the app's memory footprint (MB) and turn-order refusals for UI tests.
+    private func refreshEngineStatus() {
+        #if DEBUG
+        guard let engine = bridge else { return }
+        let handicap = currentHandicap
+        let restored = restoredMoves
+        Self.engineQueue.async {
+            func value(_ cmd: String) -> String {
+                (engine.sendGtpCommand(cmd) ?? "").replacingOccurrences(of: "= ", with: "")
+            }
+            let status = "visits=\(value("kata-get-param maxVisits")) komi=\(value("get_komi")) handicap=\(handicap) "
+                + "restored=\(restored) mem=\(Self.memoryFootprintMB()) refused=\(value("get_turn_refusals"))"
+            DispatchQueue.main.async { self.engineStatus = status }
+        }
+        #endif
+    }
+
+    #if DEBUG
+    /// Physical memory footprint of the app in MB (what Xcode's memory gauge shows), or -1.
+    private static func memoryFootprintMB() -> Int {
+        var info = task_vm_info_data_t()
+        var count = mach_msg_type_number_t(MemoryLayout<task_vm_info_data_t>.size / MemoryLayout<natural_t>.size)
+        let result = withUnsafeMutablePointer(to: &info) {
+            $0.withMemoryRebound(to: integer_t.self, capacity: Int(count)) {
+                task_info(mach_task_self_, task_flavor_t(TASK_VM_INFO), $0, &count)
+            }
+        }
+        return result == KERN_SUCCESS ? Int(info.phys_footprint / 1_048_576) : -1
+    }
+    #endif
+
+    /// Ownership (territory and dead stones) from an analysis response.
+    private static func parseOwnership(_ response: String?) -> [Double]? {
+        guard let ana = response, ana.hasPrefix("=") else { return nil }
+        let jsonStr = ana.replacingOccurrences(of: "= ", with: "").replacingOccurrences(of: "=", with: "").trimmingCharacters(in: .whitespacesAndNewlines)
+        guard let data = jsonStr.data(using: .utf8),
+              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else { return nil }
+        if let raw = json["ownership"] as? [NSNumber] { return raw.map { $0.doubleValue } }
+        return json["ownership"] as? [Double]
+    }
+
+    private func playCommand(for move: PersistedMove) -> String {
+        let color = move.stone == 1 ? "black" : "white"
+        return move.isPass ? "play \(color) pass" : "play \(color) \(toGtpCoord(x: move.x, y: move.y))"
+    }
+
+    // MARK: - Moves
+
     private func executeMove(x: Int, y: Int) {
-        guard let engine = bridge, !isThinking, finalScore == nil else { return }
+        guard let engine = bridge, !isThinking, finalScore == nil, isUserTurn, boardState[y][x] == .empty else { return }
         let turnColor = currentTurn
         let turnVal = turnColor.rawValue
         let coord = toGtpCoord(x: x, y: y)
-        
+        let generation = gameGeneration
+
         previewMove = nil
         analysis.candidates = []
         isThinking = true
-        
-        DispatchQueue.global(qos: .userInitiated).async {
+
+        Self.engineQueue.async {
             let res = engine.sendGtpCommand("play \(turnColor == .black ? "black" : "white") \(coord)")
+            let accepted = res?.hasPrefix("=") == true
+            let snapshot = Self.readSnapshot(engine)
             DispatchQueue.main.async {
-                guard let response = res, response.hasPrefix("=") else {
-                    self.isThinking = false
+                guard generation == self.gameGeneration else { return }
+                self.isThinking = false
+                guard accepted else {
+                    // Ko, suicide or superko: the engine refused the move.
+                    self.apply(snapshot)
+                    self.showPassReminder(message: NSLocalizedString("Illegal move", comment: ""))
+                    self.checkAiTurn()
                     return
                 }
-                
+
                 let move = PersistedMove(x: x, y: y, isPass: false, stone: turnVal)
                 self.moveHistory.append(move)
                 self.redoStack.removeAll()
@@ -492,38 +645,44 @@ struct GameView: View {
                 self.currentTurn = (turnColor == .black ? .white : .black)
                 self.consecutivePasses = 0
                 PersistedMove.saveAll(self.moveHistory)
-                
-                self.syncBoardFromEngine()
+
+                self.apply(snapshot)
                 SoundManager.shared.playStoneSound(withHaptic: true)
-                self.isThinking = false
-                
+
                 self.checkAiTurn()
             }
         }
     }
 
     private func handlePass() {
-        guard let engine = bridge, !isThinking, finalScore == nil else { return }
+        guard let engine = bridge, !isThinking, finalScore == nil, isUserTurn else { return }
         let turnColor = currentTurn
         let turnVal = turnColor.rawValue
-        
+        let generation = gameGeneration
+
         isThinking = true
         previewMove = nil
         analysis.candidates = []
-        
-        DispatchQueue.global(qos: .userInitiated).async {
+
+        Self.engineQueue.async {
             let res = engine.sendGtpCommand("play \(turnColor == .black ? "black" : "white") pass")
+            let snapshot = Self.readSnapshot(engine)
             DispatchQueue.main.async {
+                guard generation == self.gameGeneration else { return }
                 self.isThinking = false
-                guard let response = res, response.hasPrefix("=") else { return }
-                
+                guard let response = res, response.hasPrefix("=") else {
+                    self.apply(snapshot)
+                    return
+                }
+
                 let move = PersistedMove(x: -1, y: -1, isPass: true, stone: turnVal)
                 self.moveHistory.append(move)
+                self.redoStack.removeAll()
                 self.currentTurn = (turnColor == .black ? .white : .black)
                 self.consecutivePasses += 1
                 PersistedMove.saveAll(self.moveHistory)
-                self.syncBoardFromEngine()
-                
+                self.apply(snapshot)
+
                 if self.consecutivePasses >= 2 {
                     self.finishGame()
                 } else {
@@ -556,10 +715,7 @@ struct GameView: View {
 
     private func checkAiTurn() {
         guard isEngineInitialized, !isThinking, finalScore == nil else { return }
-        let isAiTurn = (gameMode == .aiBoth) ||
-                       (gameMode == .userBlack && currentTurn == .white) ||
-                       (gameMode == .userWhite && currentTurn == .black)
-        if isAiTurn {
+        if !isUserTurn {
             triggerAiMove()
         } else if showAnalysis {
             triggerAnalysis()
@@ -569,14 +725,16 @@ struct GameView: View {
     private func triggerAiMove() {
         guard let engine = bridge, !isThinking, finalScore == nil else { return }
         let aiColor = currentTurn
+        let wantAnalysis = showAnalysis
+        let generation = gameGeneration
         isThinking = true
-        
-        DispatchQueue.global(qos: .userInitiated).async {
+
+        Self.engineQueue.async {
             let res = engine.sendGtpCommand("genmove \(aiColor == .black ? "black" : "white")")
-            
+
             var rootInfo: [String: Any]? = nil
             var parsedOwnership: [Double]? = nil
-            if self.showAnalysis {
+            if wantAnalysis {
                 if let anaRes = engine.sendGtpCommand("kata-get-analysis black"), anaRes.hasPrefix("=") {
                     let jsonStr = anaRes.replacingOccurrences(of: "= ", with: "").replacingOccurrences(of: "=", with: "").trimmingCharacters(in: .whitespacesAndNewlines)
                     if let data = jsonStr.data(using: .utf8),
@@ -590,10 +748,12 @@ struct GameView: View {
                     }
                 }
             }
-            
+            let snapshot = Self.readSnapshot(engine)
+
             DispatchQueue.main.async {
+                guard generation == self.gameGeneration else { return }
                 self.isThinking = false
-                
+
                 if let info = rootInfo {
                     self.analysis.winrate = info["winrate"] as? Double ?? 0.5
                     self.analysis.scoreLead = info["scoreLead"] as? Double ?? 0.0
@@ -601,22 +761,27 @@ struct GameView: View {
                 if let owner = parsedOwnership {
                     self.analysis.ownership = owner
                 }
-                
-                guard let response = res, response.hasPrefix("=") else { return }
+
+                guard let response = res, response.hasPrefix("=") else {
+                    // The engine refused (e.g. turn mismatch); resync whose turn it is.
+                    self.apply(snapshot)
+                    return
+                }
                 let moveStr = response.replacingOccurrences(of: "= ", with: "").trimmingCharacters(in: .whitespacesAndNewlines)
-                
+
                 if moveStr.uppercased() == "PASS" {
                     let aiColorName = aiColor == .black ? NSLocalizedString("Black", comment: "") : NSLocalizedString("White", comment: "")
                     let format = NSLocalizedString("AI (%@) Passed", comment: "")
                     self.showPassReminder(message: String(format: format, aiColorName))
-                    
+
                     let move = PersistedMove(x: -1, y: -1, isPass: true, stone: aiColor.rawValue)
                     self.moveHistory.append(move)
+                    self.redoStack.removeAll()
                     self.currentTurn = (aiColor == .black ? .white : .black)
                     self.consecutivePasses += 1
                     PersistedMove.saveAll(self.moveHistory)
-                    self.syncBoardFromEngine()
-                    
+                    self.apply(snapshot)
+
                     if self.consecutivePasses >= 2 {
                         self.finishGame()
                     } else if self.showAnalysis && self.finalScore == nil {
@@ -630,15 +795,16 @@ struct GameView: View {
                     self.currentTurn = (aiColor == .black ? .white : .black)
                     self.consecutivePasses = 0
                     PersistedMove.saveAll(self.moveHistory)
-                    self.syncBoardFromEngine()
+                    self.apply(snapshot)
                     SoundManager.shared.playStoneSound(withHaptic: false)
                     if self.showAnalysis && self.finalScore == nil {
                         self.triggerAnalysis()
                     }
                 }
-                
-                if self.gameMode == .aiBoth && self.finalScore == nil {
+
+                if self.gameMode == .aiBoth && self.finalScore == nil && self.consecutivePasses < 2 {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        guard generation == self.gameGeneration else { return }
                         self.checkAiTurn()
                     }
                 }
@@ -662,9 +828,10 @@ struct GameView: View {
         guard let engine = bridge, isEngineInitialized, !isThinking, !isAnalyzing else { return }
         let turnColor = currentTurn
         let currentHistoryCount = moveHistory.count
+        let analysisVisits = max(100, Int(Double(currentVisits) * 0.4))
+        let generation = gameGeneration
         isAnalyzing = true
-        DispatchQueue.global(qos: .userInitiated).async {
-            let analysisVisits = max(100, Int(Double(self.currentVisits) * 0.4))
+        Self.engineQueue.async {
             let p = turnColor == .black ? "black" : "white"
             _ = engine.sendGtpCommand("think \(p) \(analysisVisits)")
             let res = engine.sendGtpCommand("kata-get-analysis black")
@@ -714,7 +881,7 @@ struct GameView: View {
             }
             DispatchQueue.main.async {
                 self.isAnalyzing = false
-                guard self.showAnalysis, self.moveHistory.count == currentHistoryCount else { return }
+                guard generation == self.gameGeneration, self.showAnalysis, self.moveHistory.count == currentHistoryCount else { return }
                 if let wr = newWinrate { self.analysis.winrate = wr }
                 if let sl = newScoreLead { self.analysis.scoreLead = sl }
                 if let owner = newOwnership { self.analysis.ownership = owner }
@@ -725,31 +892,50 @@ struct GameView: View {
         }
     }
 
-    private func finishGame() {
+    /// Scores the finished game. `presentDialog` is false when re-opening an already finished game.
+    private func finishGame(presentDialog: Bool = true) {
+        guard let engine = bridge else { return }
+        let generation = gameGeneration
         isThinking = true
-        DispatchQueue.global(qos: .userInitiated).async {
-            let res = bridge?.sendGtpCommand("final_score")
-            let anaRes = bridge?.sendGtpCommand("kata-get-analysis black")
-            var parsedOwnership: [Double]? = nil
-            if let ana = anaRes, ana.hasPrefix("=") {
-                let jsonStr = ana.replacingOccurrences(of: "= ", with: "").replacingOccurrences(of: "=", with: "").trimmingCharacters(in: .whitespacesAndNewlines)
-                if let data = jsonStr.data(using: .utf8),
-                   let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
-                    if let raw = json["ownership"] as? [NSNumber] {
-                        parsedOwnership = raw.map { $0.doubleValue }
-                    } else if let raw = json["ownership"] as? [Double] {
-                        parsedOwnership = raw
-                    }
-                }
-            }
+        isScoring = true
+        previewMove = nil
+        Self.engineQueue.async {
+            let res = engine.sendGtpCommand("final_score")
+            let parsedOwnership = Self.parseOwnership(engine.sendGtpCommand("kata-get-analysis black"))
             DispatchQueue.main.async {
+                guard generation == self.gameGeneration else { return }
                 self.isThinking = false
+                self.isScoring = false
                 if let owner = parsedOwnership {
                     self.analysis.ownership = owner
                 }
                 self.analysis.candidates = []
-                finalScore = res?.replacingOccurrences(of: "= ", with: "") ?? "Game Ended"
-                showGameOverDialog = true
+                if let response = res, response.hasPrefix("=") {
+                    let result = response.replacingOccurrences(of: "= ", with: "")
+                    self.finalScore = result
+                    // Remember it, so reopening the finished game shows the same result without re-scoring.
+                    PersistedResult(moveCount: self.moveHistory.count, result: result).save()
+                } else {
+                    self.finalScore = "Game Ended"
+                }
+                self.showGameOverDialog = presentDialog
+                self.refreshEngineStatus()
+            }
+        }
+    }
+
+    /// Re-opens a finished game with its saved result; only the territory display is recomputed.
+    private func showSavedResult(_ result: String) {
+        guard let engine = bridge else { return }
+        let generation = gameGeneration
+        finalScore = result
+        previewMove = nil
+        analysis.candidates = []
+        Self.engineQueue.async {
+            let ownership = Self.parseOwnership(engine.sendGtpCommand("kata-get-analysis black"))
+            DispatchQueue.main.async {
+                guard generation == self.gameGeneration, let owner = ownership else { return }
+                self.analysis.ownership = owner
             }
         }
     }
@@ -769,7 +955,7 @@ struct GameView: View {
         let paths = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)
         let storagePath = paths.first?.path ?? NSTemporaryDirectory()
 
-        DispatchQueue.global(qos: .userInitiated).async {
+        Self.engineQueue.async {
             let status = engine.initEngine(withConfig: configPath, model: modelPath, storage: storagePath)
             if status == 0 {
                 DispatchQueue.main.async {
@@ -802,13 +988,21 @@ struct GameView: View {
         showNewGame = false
         showSettings = false
         PersistedMove.saveAll([])
+        PersistedResult.clear()
         restoreGame(settings: settings, moves: [])
     }
 
     private func restoreGame(settings: GameSettings, moves: [PersistedMove]) {
         guard let engine = bridge else { return }
+        // Invalidate every pending result from the previous game (AI move, analysis, scoring).
+        gameGeneration += 1
+        let generation = gameGeneration
         isThinking = true
-        DispatchQueue.global(qos: .userInitiated).async {
+        isScoring = false
+        previewMove = nil
+        analysis.candidates = []
+        showGameOverDialog = false
+        Self.engineQueue.async {
             engine.sendGtpCommand("clear_board")
             engine.sendGtpCommand("set_max_visits \(settings.visits)")
             engine.sendGtpCommand("komi \(settings.handicap > 0 ? 0.5 : 7.5)")
@@ -824,110 +1018,141 @@ struct GameView: View {
                 gameMoves = moves
             }
 
-            var board = Array(repeating: Array(repeating: Stone.empty, count: 19), count: 19)
-            for pt in self.getFixedHandicapStones(count: settings.handicap) {
-                board[pt.1][pt.0] = .black
-            }
-            
+            // Replay the saved game. Stop at the first move the engine rejects so the move list
+            // always matches the engine's game record.
             var history: [PersistedMove] = []
-            var last: (Int, Int)? = nil
-            var passes = 0
-            
             for move in gameMoves {
-                let stone = Stone(rawValue: move.stone) ?? .empty
-                let cmd = move.isPass ? "play \(move.stone == 1 ? "black" : "white") pass" : "play \(move.stone == 1 ? "black" : "white") \(toGtpCoord(x: move.x, y: move.y))"
-                _ = engine.sendGtpCommand(cmd)
-                
+                guard engine.sendGtpCommand(self.playCommand(for: move))?.hasPrefix("=") == true else { break }
                 history.append(move)
-                if !move.isPass {
-                    board[move.y][move.x] = stone
-                    last = (move.x, move.y)
-                    passes = 0
-                } else {
-                    passes += 1
-                }
             }
-            
-            let nextTurn: Stone
-            if gameMoves.isEmpty {
-                nextTurn = settings.handicap > 0 ? .white : .black
-            } else {
-                nextTurn = (gameMoves.last?.stone == 1) ? .white : .black
-            }
+            let snapshot = Self.readSnapshot(engine)
             
             DispatchQueue.main.async {
-                self.boardState = board
-                self.lastMove = last
+                guard generation == self.gameGeneration else { return }
+                let trailingPasses = history.reversed().prefix(while: { $0.isPass }).count
+                self.lastMove = history.last(where: { !$0.isPass }).map { ($0.x, $0.y) }
                 self.previewMove = nil
                 self.finalScore = nil
                 self.analysis = AnalysisResult()
-                self.consecutivePasses = passes
+                self.consecutivePasses = trailingPasses
                 self.moveHistory = history
                 self.redoStack = []
                 self.gameMode = settings.mode
+                self.currentHandicap = settings.handicap
+                self.restoredMoves = history.count
                 self.currentVisits = settings.visits
-                self.currentTurn = nextTurn
-                self.syncBoardFromEngine()
+                if let last = history.last {
+                    self.currentTurn = last.stone == 1 ? .white : .black
+                } else {
+                    self.currentTurn = settings.handicap > 0 ? .white : .black
+                }
+                self.apply(snapshot)
+                if history.count != moves.count {
+                    PersistedMove.saveAll(history)
+                }
                 self.isThinking = false
+                if trailingPasses >= 2 {
+                    // The saved game had already ended: show its result instead of playing on.
+                    if let saved = PersistedResult.load(), saved.moveCount == history.count {
+                        self.showSavedResult(saved.result)
+                    } else {
+                        self.finishGame(presentDialog: false)
+                    }
+                } else {
+                    self.checkAiTurn()
+                }
+            }
+        }
+    }
+
+    private func undoMove() {
+        let count = movesToUndo
+        guard let engine = bridge, !isThinking, count > 0 else { return }
+        let generation = gameGeneration
+        isThinking = true
+        previewMove = nil
+        analysis.candidates = []
+
+        Self.engineQueue.async {
+            var undone = 0
+            while undone < count, engine.sendGtpCommand("undo")?.hasPrefix("=") == true {
+                undone += 1
+            }
+            let snapshot = Self.readSnapshot(engine)
+            DispatchQueue.main.async {
+                guard generation == self.gameGeneration else { return }
+                self.isThinking = false
+                guard undone > 0 else {
+                    self.apply(snapshot)
+                    return
+                }
+                let removed = Array(self.moveHistory.suffix(undone))
+                self.moveHistory.removeLast(undone)
+                // Pushed newest-first so Redo replays them in their original order.
+                self.redoStack.append(contentsOf: removed.reversed())
+                self.lastMove = self.moveHistory.last(where: { !$0.isPass }).map { ($0.x, $0.y) }
+                self.currentTurn = Stone(rawValue: removed[0].stone) ?? .black
+                self.consecutivePasses = self.moveHistory.reversed().prefix(while: { $0.isPass }).count
+                // Taking back a move after the game ended resumes play.
+                self.finalScore = nil
+                self.showGameOverDialog = false
+                PersistedResult.clear()
+                PersistedMove.saveAll(self.moveHistory)
+                self.apply(snapshot)
                 self.checkAiTurn()
             }
         }
     }
     
-    private func getFixedHandicapStones(count: Int) -> [(Int, Int)] {
-        switch count {
-        case 1: return [(15, 3)]
-        case 2: return [(3, 15), (15, 3)]
-        case 3: return [(3, 15), (15, 3), (3, 3)]
-        case 4: return [(3, 15), (15, 3), (3, 3), (15, 15)]
-        case 5: return [(3, 15), (15, 3), (3, 3), (15, 15), (9, 9)]
-        case 6: return [(3, 15), (15, 3), (3, 3), (15, 15), (3, 9), (15, 9)]
-        case 7: return [(3, 15), (15, 3), (3, 3), (15, 15), (3, 9), (15, 9), (9, 9)]
-        case 8: return [(3, 15), (15, 3), (3, 3), (15, 15), (3, 9), (15, 9), (9, 3), (9, 15)]
-        case 9: return [(3, 15), (15, 3), (3, 3), (15, 15), (3, 9), (15, 9), (9, 3), (9, 15), (9, 9)]
-        default: return []
-        }
-    }
-
-    private func undoMove() {
-        guard !isThinking, let last = moveHistory.popLast() else { return }
-        bridge?.sendGtpCommand("undo")
-        redoStack.append(last)
-        lastMove = moveHistory.last(where: { !$0.isPass }).map { ($0.x, $0.y) }
-        currentTurn = Stone(rawValue: last.stone) ?? .black
-        syncBoardFromEngine()
-        
-        var passes = 0
-        for m in moveHistory.reversed() {
-            if m.isPass {
-                passes += 1
-            } else {
-                break
-            }
-        }
-        consecutivePasses = passes
-        PersistedMove.saveAll(moveHistory)
-        
-        analysis.candidates = []
-        if showAnalysis { triggerAnalysis() }
-    }
-    
     private func redoMove() {
-        guard !isThinking, let next = redoStack.popLast() else { return }
-        let cmd = next.isPass ? "play \(next.stone == 1 ? "black" : "white") pass" : "play \(next.stone == 1 ? "black" : "white") \(toGtpCoord(x: next.x, y: next.y))"
-        if bridge?.sendGtpCommand(cmd)?.hasPrefix("=") == true {
-            moveHistory.append(next)
-            lastMove = next.isPass ? moveHistory.last(where: { !$0.isPass }).map { ($0.x, $0.y) } : (next.x, next.y)
-            consecutivePasses = next.isPass ? (consecutivePasses + 1) : 0
-            currentTurn = (next.stone == 1 ? .white : .black)
-            PersistedMove.saveAll(moveHistory)
-            syncBoardFromEngine()
-            if !next.isPass {
-                SoundManager.shared.playStoneSound(withHaptic: true)
+        guard let engine = bridge, !isThinking, !redoStack.isEmpty, gameMode != .aiBoth else { return }
+        // Replay one move; against KataGo also replay its stored reply so it is your turn again.
+        var batch: [PersistedMove] = []
+        for move in redoStack.reversed() {
+            batch.append(move)
+            let nextToMove: Stone = move.stone == 1 ? .white : .black
+            if isHumanColor(nextToMove) { break }
+        }
+        let generation = gameGeneration
+        isThinking = true
+        previewMove = nil
+        analysis.candidates = []
+
+        Self.engineQueue.async {
+            var replayed: [PersistedMove] = []
+            for move in batch {
+                guard engine.sendGtpCommand(self.playCommand(for: move))?.hasPrefix("=") == true else { break }
+                replayed.append(move)
             }
-            
-            analysis.candidates = []
-            if showAnalysis { triggerAnalysis() }
+            let snapshot = Self.readSnapshot(engine)
+            DispatchQueue.main.async {
+                guard generation == self.gameGeneration else { return }
+                self.isThinking = false
+                if replayed.count == batch.count {
+                    self.redoStack.removeLast(replayed.count)
+                } else {
+                    // A stored move no longer applies; the rest of the redo list is invalid too.
+                    self.redoStack.removeAll()
+                }
+                guard let last = replayed.last else {
+                    self.apply(snapshot)
+                    return
+                }
+                self.moveHistory.append(contentsOf: replayed)
+                self.lastMove = self.moveHistory.last(where: { !$0.isPass }).map { ($0.x, $0.y) }
+                self.consecutivePasses = self.moveHistory.reversed().prefix(while: { $0.isPass }).count
+                self.currentTurn = (last.stone == 1 ? .white : .black)
+                PersistedMove.saveAll(self.moveHistory)
+                self.apply(snapshot)
+                if replayed.contains(where: { !$0.isPass }) {
+                    SoundManager.shared.playStoneSound(withHaptic: true)
+                }
+                if self.consecutivePasses >= 2 {
+                    self.finishGame()
+                } else {
+                    self.checkAiTurn()
+                }
+            }
         }
     }
 
@@ -952,8 +1177,8 @@ struct SettingsView: View {
     @ObservedObject private var soundManager = SoundManager.shared
 
     private var appVersion: String {
-        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.14"
-        let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "15"
+        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.15"
+        let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "16"
         return "\(version) (\(build))"
     }
 
@@ -1016,6 +1241,29 @@ struct NewGameView: View {
     @ObservedObject private var storeManager = StoreManager.shared
     
     private let levels: [(String, Int)] = [("Easy", 100), ("Amateur", 500), ("Advanced", 1000), ("Pro", 2500)]
+
+    private var handicapLabel: LocalizedStringKey {
+        switch settings.handicap {
+        case 0: return "No Handicap"
+        case 1: return "1 Stone"
+        default: return "\(settings.handicap) Stones"
+        }
+    }
+
+    /// Handicap stones always go to Black, so spell out who that is for the chosen side.
+    @ViewBuilder
+    private var handicapFooter: some View {
+        if settings.handicap > 0 {
+            switch settings.mode {
+            case .userBlack:
+                Text("You play Black and receive the handicap stones. KataGo (White) moves first.")
+            case .userWhite:
+                Text("KataGo plays Black and receives the handicap stones. You (White) move first.")
+            case .userBoth, .aiBoth:
+                Text("Black receives the handicap stones. White moves first.")
+            }
+        }
+    }
     
     var body: some View {
         NavigationView {
@@ -1052,6 +1300,7 @@ struct NewGameView: View {
                                         .foregroundColor(visits == level.1 ? .white : .primary)
                                     }
                                     .buttonStyle(.plain)
+                                    .accessibilityAddTraits(visits == level.1 ? .isSelected : [])
                                 }
                             }
                             if !storeManager.isPurchased {
@@ -1085,8 +1334,10 @@ struct NewGameView: View {
                         .labelsHidden()
                     }
                     
-                    Section(header: Text("Handicap")) {
-                        Stepper("\(settings.handicap) Stones", value: $settings.handicap, in: 0...9)
+                    Section(header: Text("Handicap"), footer: handicapFooter) {
+                        Stepper(value: $settings.handicap, in: 0...9) {
+                            Text(handicapLabel)
+                        }
                     }
                 }
                 
@@ -1174,6 +1425,7 @@ struct NewGameView: View {
                                 .background(Color.blue)
                                 .cornerRadius(25)
                         }
+                        .accessibilityIdentifier("startGame")
                     }
                 }
                 .padding([.horizontal, .bottom])
@@ -1253,6 +1505,8 @@ struct SplashScreenView: View {
                         .frame(width: 120, height: 120)
                         .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
                         .shadow(color: .black.opacity(0.4), radius: 8, y: 4)
+                        // UI tests wait for the splash to go away: it covers the board and buttons.
+                        .accessibilityIdentifier("splashScreen")
                 }
                 .frame(width: 120, height: 120)
 

@@ -1,0 +1,52 @@
+{
+  "configurations" : [
+    {
+      "id" : "6A1F0C3E-6E2B-4B7A-9E51-0F4E1D2C3B01",
+      "name" : "Free",
+      "options" : {
+        "environmentVariableEntries" : [
+          {
+            "key" : "WEIQI_PAYMENT",
+            "value" : "disabled"
+          }
+        ]
+      }
+    },
+    {
+      "id" : "6A1F0C3E-6E2B-4B7A-9E51-0F4E1D2C3B02",
+      "name" : "Premium",
+      "options" : {
+        "environmentVariableEntries" : [
+          {
+            "key" : "WEIQI_PAYMENT",
+            "value" : "enabled"
+          }
+        ]
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "targetForVariableExpansion" : {
+      "containerPath" : "container:Weiqi.xcodeproj",
+      "identifier" : "C2901A127A1A89283470A03C",
+      "name" : "Weiqi"
+    }
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:Weiqi.xcodeproj",
+        "identifier" : "7878804C2081E6D039952300",
+        "name" : "WeiqiTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:Weiqi.xcodeproj",
+        "identifier" : "12D14670F815B8196C439978",
+        "name" : "WeiqiUITests"
+      }
+    }
+  ],
+  "version" : 1
+}

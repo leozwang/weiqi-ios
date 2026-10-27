@@ -12,7 +12,9 @@ targets:
       - path: Weiqi/external/katago/cpp/neuralnet/metallayers.swift
     settings:
       PRODUCT_MODULE_NAME: KataGoSwift
-      SWIFT_CXX_INTEROPERABILITY_MODE: default
+      # Real Xcode setting for -cxx-interoperability-mode=default: makes Xcode generate
+      # KataGoSwift-Swift.h (with C++ bindings) using the current Swift compiler on every build.
+      SWIFT_OBJC_INTEROP_MODE: objcxx
       DEFINES_MODULE: YES
       ENABLE_USER_SCRIPT_SANDBOXING: NO
     frameworks:
@@ -22,13 +24,27 @@ targets:
   Weiqi:
     type: application
     platform: iOS
-    scheme: {}
+    scheme:
+      testTargets:
+        - WeiqiTests
+        - WeiqiUITests
+      # Weiqi.xctestplan runs every test twice: "Free" (payment disabled) and "Premium" (enabled).
+      testPlans:
+        - path: Weiqi.xctestplan
+          defaultPlan: true
+      # Local StoreKit testing for Run (⌘R): purchases use Weiqi/Products.storekit instead of the
+      # App Store. Has no effect on archives/TestFlight/App Store builds.
+      storeKitConfiguration: Weiqi/Products.storekit
     dependencies:
       - target: KataGoSwift
     sources:
       - path: Weiqi
         excludes:
           - external
+          - Products.storekit
+      # Listed for Xcode (scheme + navigator) but not copied into the app bundle.
+      - path: Weiqi/Products.storekit
+        buildPhase: none
       - path: Weiqi/Assets.xcassets
       - path: Weiqi/external/katago/cpp/core
       - path: Weiqi/external/katago/cpp/game
@@ -56,8 +72,8 @@ targets:
       INFOPLIST_FILE: Weiqi/Info.plist
       PRODUCT_BUNDLE_IDENTIFIER: com.cwave.weiqi
       ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
-      CURRENT_PROJECT_VERSION: "15"
-      MARKETING_VERSION: "1.14"
+      CURRENT_PROJECT_VERSION: "16"
+      MARKETING_VERSION: "1.15"
       SWIFT_OBJC_BRIDGING_HEADER: Weiqi/Weiqi-Bridging-Header.h
       SWIFT_USE_EXPLICIT_MODULE_BUILD: NO
       ENABLE_USER_SCRIPT_SANDBOXING: NO
@@ -65,8 +81,10 @@ targets:
       OTHER_CPLUSPLUSFLAGS: >
         -std=c++20 -DUSE_METAL_BACKEND -DNO_GIT_REVISION -DNO_LIBZIP
         -Wno-documentation -Wno-documentation-deprecated-sync -Wno-deprecated-anon-enum-enum-conversion
-        -Wno-unused-variable -Wno-shorten-64-to-32
+        -Wno-deprecated-literal-operator -Wno-unused-variable -Wno-shorten-64-to-32
       HEADER_SEARCH_PATHS:
+        # Generated KataGoSwift-Swift.h (from the KataGoSwift target) used by metalbackend.h
+        - $(BUILT_PRODUCTS_DIR)/include/KataGoSwift
         - $(SRCROOT)/Weiqi/external/katago/cpp
         - $(SRCROOT)/Weiqi/external/katago/cpp/neuralnet
         - $(SRCROOT)/Weiqi/external/katago/cpp/external
@@ -82,3 +100,34 @@ targets:
       - MetalPerformanceShaders
       - MetalPerformanceShadersGraph
       - AVFoundation
+
+  # Engine-level tests, hosted in the app (talk to the real KataGo bridge). See README > Testing.
+  WeiqiTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: WeiqiTests
+      # Loaded by SKTestSession in StoreTests (local StoreKit test environment).
+      - path: Weiqi/Products.storekit
+        buildPhase: resources
+    dependencies:
+      - target: Weiqi
+    settings:
+      DEVELOPMENT_TEAM: 5QS428JSKE
+      GENERATE_INFOPLIST_FILE: YES
+      TEST_HOST: $(BUILT_PRODUCTS_DIR)/Weiqi.app/Weiqi
+      BUNDLE_LOADER: $(TEST_HOST)
+      SWIFT_OBJC_BRIDGING_HEADER: WeiqiTests/WeiqiTests-Bridging-Header.h
+
+  # End-to-end gameplay tests that drive the app UI. See README > Testing.
+  WeiqiUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: WeiqiUITests
+    dependencies:
+      - target: Weiqi
+    settings:
+      DEVELOPMENT_TEAM: 5QS428JSKE
+      GENERATE_INFOPLIST_FILE: YES
+      TEST_TARGET_NAME: Weiqi

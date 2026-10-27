@@ -13,8 +13,22 @@ class StoreManager: ObservableObject {
     @Published var errorMessage: String?
     
     private var transactionListener: Task<Void, Error>?
+
+    #if DEBUG
+    /// Set by UI tests through the WEIQI_UITEST_PURCHASED launch variable ("1" purchased,
+    /// "0" not purchased) so the whole suite can run in each payment state. Debug builds only:
+    /// App Store (Release) builds always use StoreKit.
+    private var isPurchaseStatePinned = false
+    #endif
     
     init() {
+        #if DEBUG
+        if let pinned = ProcessInfo.processInfo.environment["WEIQI_UITEST_PURCHASED"] {
+            isPurchased = (pinned == "1")
+            isPurchaseStatePinned = true
+        }
+        #endif
+
         // Start listening for transaction updates in the background
         transactionListener = Task {
             for await result in Transaction.updates {
@@ -87,6 +101,9 @@ class StoreManager: ObservableObject {
     }
     
     func updatePurchaseStatus() async {
+        #if DEBUG
+        if isPurchaseStatePinned { return }
+        #endif
         var purchased = false
         for await result in Transaction.currentEntitlements {
             if case .verified(let transaction) = result {
